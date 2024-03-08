@@ -1,47 +1,68 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/ptrace.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ifndef WASM_DOCTOR
+#define WASM_DOCTOR
 
-void continue_execution(int pid) {
-  ptrace(PTRACE_CONT, pid, NULL, NULL);
+// 0003cce 0004a6c
 
-  int wait_status;
-  int options = 0;
-  waitpid(pid, &wait_status, options);
+#include <limits.h> /* for CHAR_BIT */
+#include <stdint.h> /* for uint32_t */
+
+typedef uint32_t word_t;
+enum { BITS_PER_WORD = sizeof(word_t) * CHAR_BIT };
+#define WORD_OFFSET(b) ((b) / BITS_PER_WORD)
+#define BIT_OFFSET(b) ((b) % BITS_PER_WORD)
+
+void
+set_bit(word_t *words, int n)
+{
+        words[WORD_OFFSET(n)] |= ((word_t)1 << BIT_OFFSET(n));
 }
 
-int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    return -1;
-  }
-
-  char *prog = argv[1];
-
-  int pid = fork();
-  if (pid == 0) {
-    printf("Executing debuggee\n");
-    ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-    execl(prog, prog, NULL);
-  } else if (pid >= 1) {
-    int wait_status;
-    int options = 0;
-    waitpid(pid, &wait_status, options);
-
-    char command[9];
-    printf("Command: ");
-    scanf("%s", command);
-    printf("You entered %s\n", command);
-
-    if (strncmp(command, "c", sizeof(command)) == 0 ||
-        strncmp(command, "cont", sizeof(command)) == 0 ||
-        strncmp(command, "continue", sizeof(command)) == 0) {
-      continue_execution(pid);
-    } else {
-      printf("Not continuing\n");
-    }
-  }
-
-  return 0;
+void
+clear_bit(word_t *words, int n)
+{
+        words[WORD_OFFSET(n)] &= ~((word_t)1 << BIT_OFFSET(n));
 }
+
+int
+get_bit(word_t *words, int n)
+{
+        word_t bit = words[WORD_OFFSET(n)] & ((word_t)1 << BIT_OFFSET(n));
+        return bit != 0;
+}
+
+#include <stdint.h>
+
+uint8_t initialized = 0;
+word_t words[100000000];
+
+void
+init(void)
+{
+        if (!initialized) {
+                for (uint32_t i = 0x0003cce; i <= 0x0004a6c; ++i) {
+                        set_bit(words, i);
+                }
+
+                initialized = 1;
+        }
+}
+
+void
+register_store(uint32_t address)
+{
+        init();
+
+        for (uint32_t i = 0; i < 32; ++i) {
+                set_bit(words, address + i);
+        }
+}
+
+uint8_t
+validate_load(uint32_t address)
+{
+        init();
+
+        return get_bit(words, address);
+}
+
+#endif /* WASM_DOCTOR */
