@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 struct valid_block {
-  uintptr_t addr;
-  uint64_t size;
+        uintptr_t addr;
+        uint64_t size;
 };
 
 void register_store(uintptr_t address, uint64_t size);
