@@ -12,10 +12,10 @@ static uintptr_t shadow_stack_pointer = UINT32_MAX;
 void
 move_shadow_stack_pointer(uintptr_t address)
 {
-        /* printf("move ssp\n"); */
-
         if (address > shadow_stack_pointer) {
-                invalidate_region(&mem, shadow_stack_pointer, address);
+                invalidate_region(&mem, shadow_stack_pointer * 8, address * 8);
+                printf("move ssp - invalidate region from %lu to %lu\n",
+                       shadow_stack_pointer, address);
         }
 
         shadow_stack_pointer = address;
@@ -24,8 +24,6 @@ move_shadow_stack_pointer(uintptr_t address)
 void
 register_store(uintptr_t address, uint64_t size)
 {
-        /* printf("register store at %lu of size %lu\n", address, size); */
-
         if (!initialized) {
                 shadow_memory_init(&mem, 65536 * 10);
                 initialized = true;
@@ -37,7 +35,5 @@ register_store(uintptr_t address, uint64_t size)
 uint8_t
 validate_load(uintptr_t address)
 {
-        /* printf("validate load\n"); */
-
         return is_valid_region(&mem, address * 8, (address + 1) * 8 - 1);
 }

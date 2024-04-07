@@ -32,7 +32,7 @@ validate_region(struct shadow_memory *mem, uint32_t bit_idx_start,
                 uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
-                mem->words[i / BYTES_PER_WORD] |= 1 << i % BYTES_PER_WORD;
+                validate(mem, i);
         }
 }
 
@@ -41,7 +41,7 @@ invalidate_region(struct shadow_memory *mem, uint32_t bit_idx_start,
                   uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
-                mem->words[i / BYTES_PER_WORD] &= ~(1 << i % BYTES_PER_WORD);
+                invalidate(mem, i);
         }
 }
 
@@ -50,8 +50,7 @@ is_valid_region(struct shadow_memory *mem, uint32_t bit_idx_start,
                 uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
-                if ((mem->words[i / BYTES_PER_WORD] &
-                     (1 << i % BYTES_PER_WORD)) == 0) {
+                if (!is_valid(mem, i)) {
                         return false;
                 }
         }
