@@ -8,6 +8,7 @@ struct valid_block {
         uint64_t size;
 };
 
+void move_shadow_stack_pointer(uintptr_t address);
 void register_store(uintptr_t address, uint64_t size);
 uint8_t validate_load(uintptr_t address);
 

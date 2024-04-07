@@ -1,37 +1,43 @@
 #include <stdint.h>
+#include <stdio.h>
 
+#include "mem_addr_validator.h"
 #include "wasm_doctor.h"
 
-uint64_t idx = 0;
-struct valid_block valid_blocks[100000] = {0};
+static bool initialized = false;
+static struct shadow_memory mem;
+
+static uintptr_t shadow_stack_pointer = UINT32_MAX;
+
+void
+move_shadow_stack_pointer(uintptr_t address)
+{
+        /* printf("move ssp\n"); */
+
+        if (address > shadow_stack_pointer) {
+                invalidate_region(&mem, shadow_stack_pointer, address);
+        }
+
+        shadow_stack_pointer = address;
+}
 
 void
 register_store(uintptr_t address, uint64_t size)
 {
-        /* if (idx <= 10 && idx > 2) { */
-        /*         ++idx; */
-        /*         return; */
-        /* } */
+        /* printf("register store at %lu of size %lu\n", address, size); */
 
-        struct valid_block new_valid_block = {
-                .addr = address,
-                .size = size,
-        };
+        if (!initialized) {
+                shadow_memory_init(&mem, 65536 * 10);
+                initialized = true;
+        }
 
-        valid_blocks[idx++] = new_valid_block;
+        validate_region(&mem, address * 8, (address + size) * 8 - 1);
 }
 
 uint8_t
 validate_load(uintptr_t address)
 {
-        for (uint64_t i = 0; i < idx; ++i) {
-                if (valid_blocks[i].addr <= address &&
-                    address <=
-                            valid_blocks[i].addr +
-                                    sizeof(uint8_t) * valid_blocks[i].size) {
-                        return 1;
-                }
-        }
+        /* printf("validate load\n"); */
 
-        return 0;
+        return is_valid_region(&mem, address * 8, (address + 1) * 8 - 1);
 }
