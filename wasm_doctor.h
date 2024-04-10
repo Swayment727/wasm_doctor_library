@@ -1,15 +1,14 @@
 #ifndef WASM_DOCTOR
 #define WASM_DOCTOR
 
+#include <stdbool.h>
 #include <stdint.h>
 
-struct valid_block {
-        uintptr_t addr;
-        uint64_t size;
-};
+typedef uint32_t wasmptr_t;
 
-void move_shadow_stack_pointer(uintptr_t address);
-void register_store(uintptr_t address, uint64_t size);
-uint8_t validate_load(uintptr_t address);
+void move_shadow_stack_pointer(wasmptr_t address);
+void shadow_store(wasmptr_t address, uint8_t size);
+bool shadow_load(wasmptr_t address, uint8_t size);
+void doctor_init(uint32_t num_of_pages);
 
 #endif /* WASM_DOCTOR */

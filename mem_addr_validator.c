@@ -10,6 +10,8 @@
 void
 validate(struct shadow_memory *mem, uint32_t bit_idx)
 {
+        /* printf("%u %lu %lu\n", bit_idx, BYTES_PER_WORD, */
+        /* bit_idx / BYTES_PER_WORD); */
         mem->words[bit_idx / BYTES_PER_WORD] |= 1 << bit_idx % BYTES_PER_WORD;
 }
 
@@ -63,5 +65,5 @@ shadow_memory_init(struct shadow_memory *mem, uint32_t mem_size)
 {
         mem->words = (word_t *)malloc(mem_size / sizeof(*mem->words) *
                                       sizeof(word_t));
-        invalidate_region(mem, 0, mem_size / sizeof(*mem->words));
+        invalidate_region(mem, 0, mem_size);
 }
