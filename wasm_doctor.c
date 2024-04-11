@@ -31,10 +31,10 @@ move_shadow_stack_pointer(wasmptr_t address)
  * @param[in] size Size of the store in bits.
  */
 void
-shadow_store(wasmptr_t address, uint8_t size)
+shadow_store(wasmptr_t address, uint32_t size)
 {
-        printf("store from %u to %u\n", address * 8, (address + size) * 8 - 1);
-        validate_region(&mem, address * 8, (address + size) * 8 - 1);
+        printf("store from %u to %u\n", address * 8, address * 8 + size - 1);
+        validate_region(&mem, address * 8, address * 8 + size - 1);
 }
 
 /**
@@ -42,10 +42,10 @@ shadow_store(wasmptr_t address, uint8_t size)
  * @param[in] size Size of the load in bits.
  */
 bool
-shadow_load(wasmptr_t address, uint8_t size)
+shadow_load(wasmptr_t address, uint32_t size)
 {
-        printf("load from %u to %u\n", address * 8, (address + size) * 8 - 1);
-        return is_valid_region(&mem, address * 8, (address + size) * 8 - 1);
+        printf("load from %u to %u\n", address * 8, address * 8 + size - 1);
+        return is_valid_region(&mem, address * 8, address * 8 + size - 1);
 }
 
 /**
