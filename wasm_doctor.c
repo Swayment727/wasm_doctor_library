@@ -49,10 +49,10 @@ shadow_load(wasmptr_t address, uint32_t size)
 }
 
 /**
- * @param[in] num_of_pages Size of WebAssembly memory in pages.
+ * @param[in] size_in_pages Size of WebAssembly memory in pages.
  */
 void
-doctor_init(uint32_t num_of_pages)
+doctor_init(uint32_t size_in_pages)
 {
-        shadow_memory_init(&mem, WASM_PAGE_SIZE * num_of_pages * 8);
+        shadow_memory_init(&mem, WASM_PAGE_SIZE * size_in_pages * 8);
 }
