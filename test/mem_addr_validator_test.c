@@ -1,4 +1,4 @@
-#include "../mem_addr_validator.h"
+#include "../src/mem_addr_validator.h"
 
 #include <assert.h>
 #include <stdbool.h>
