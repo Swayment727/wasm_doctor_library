@@ -17,7 +17,6 @@ all: compile test
 
 .PHONY: compile
 compile: $(BUILD_DIR)/$(TARGET).a
-	@echo "compile"
 
 $(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/mem_addr_validator.o
 	ar rcs $@ $^
@@ -27,8 +26,11 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(SOURCE_DIR)/%.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 .PHONY: test
-test: $(TARGET_TEST)
-	@echo "test"
+test: $(TARGET_TEST) run-test
+
+.PHONY: run-test
+run-test:
+	./$(TARGET_TEST)
 
 $(TARGET_TEST): $(BUILD_DIR_TEST)/mem_addr_validator_test.o
 	$(CC) $(CFLAGS) -o $@ $^ -L$(BUILD_DIR) -lwasmdoctor
