@@ -1,63 +1,37 @@
-TARGET = wasm_doctor
+TARGET = libwasmdoctor
 TARGET_TEST = build/test/test
 
 CC = gcc
-MKDIR = mkdir -p
-
 CFLAGS = -Wall -pedantic
 
 SOURCE_DIR = src
-TEST_SOURCE_DIR = test
 BUILD_DIR = build
 
+SOURCE_DIR_TEST = test
 BUILD_DIR_TEST = build/test
 
-SOURCES = $(wildcard $(SOURCE_DIR)/*.c)
-TEST_SOURCES = $(wildcard $(TEST_SOURCE_DIR)/*.c)
-HEADERS = $(wildcard $(SOURCE_DIR)/*.h)
-
-OBJECTS = $(SOURCES:$(SOURCE_DIR)/%.c=$(BUILD_DIR)/%.o)
-
-OBJECTS_TEST = $(TEST_SOURCES:$(TEST_SOURCE_DIR)/%.c=$(BUILD_DIR_TEST)/%.o)
-
 .PHONY: all
-all: compile test doc
-	@echo "finished"
+all: compile test
 
 .PHONY: compile
-compile: $(TARGET)
+compile: $(BUILD_DIR)/$(TARGET).a
 	@echo "compile"
 
-$(TARGET): $(OBJECTS)
-	$(CC) $^ -o $@
+$(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/mem_addr_validator.o
+	ar rcs $@ $^
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
-	$(MKDIR) $(BUILD_DIR)
-	$(CC) $(CFLAGS) $< -c -o $@
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(SOURCE_DIR)/%.h
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 .PHONY: test
-test: compile-test run-test
-	@echo "test finished..."
+test: $(TARGET_TEST)
+	@echo "test"
 
-.PHONY: compile-test
-compile-test: $(TARGET_TEST)
-	@echo "compile test..."
+$(TARGET_TEST): $(BUILD_DIR_TEST)/mem_addr_validator_test.o
+	$(CC) $(CFLAGS) -o $@ $^
 
-.PHONY: run-test
-run-test:
-	./$(TARGET_TEST)
+$(BUILD_DIR_TEST)/%.o: $(SOURCE_DIR_TEST)/%.c
+	$(CC) $(CFLAGS) -o $@ -c $< -L$(BUILD_DIR) -lwasmdoctor
 
-$(TARGET_TEST): $(OBJECTS_TEST) $(OBJECTS)
-	$(CC) $^ -o $@
-
-$(BUILD_DIR_TEST)/%.o: $(TEST_SOURCE_DIR)/%.c
-	$(MKDIR) $(BUILD_DIR_TEST)
-	$(CC) $(CFLAGS) $< -c -o $@
-
-.PHONY: doc
-doc: Doxyfile $(HEADERS)
-	doxygen Doxyfile
-
-.PHONY: clean
 clean:
-	rm -rf $(TARGET) $(TARGET_TEST) $(BUILD_DIR) $(BUILD_DIR_TEST) doc/ 2>/dev/null
+	rm -rf $(BUILD_DIR)/*
