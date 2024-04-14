@@ -11,137 +11,137 @@
 struct shadow_memory mem;
 
 void
-is_valid_after_init()
+test_shadow_memory_init(void)
 {
         shadow_memory_init(&mem, MEM_SIZE);
+
         for (uint32_t i = 0; i < MEM_SIZE; ++i) {
                 assert(is_valid(&mem, i) == false);
         }
-}
-
-void
-is_valid_region_after_init()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
         assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == false);
+
+        shadow_memory_exit(&mem);
 }
 
 void
-is_valid_after_validate()
+test_is_valid_region(void)
 {
         shadow_memory_init(&mem, MEM_SIZE);
-        validate(&mem, VALID_IDX);
-        for (uint32_t i = 0; i < MEM_SIZE; ++i) {
-                if (i != VALID_IDX) {
-                        assert(is_valid(&mem, i) == false);
-                } else {
-                        assert(is_valid(&mem, i) == true);
-                }
-        }
-}
 
-void
-is_valid_region_after_validate()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
-        validate(&mem, VALID_IDX);
-        assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == false);
-}
-
-void
-is_valid_after_all_validated()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
         validate_region(&mem, 0, MEM_SIZE - 1);
+
         for (uint32_t i = 0; i < MEM_SIZE; ++i) {
                 assert(is_valid(&mem, i) == true);
         }
-}
-
-void
-is_valid_region_after_all_validated()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
-        for (uint32_t i = 0; i < MEM_SIZE; ++i) {
-                validate(&mem, i);
-        }
         assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == true);
-}
 
-void
-is_valid_after_all_validated_by_validate_all()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
-        for (uint32_t i = 0; i < MEM_SIZE; ++i) {
-                validate(&mem, i);
-        }
-        for (uint32_t i = 0; i < MEM_SIZE; ++i) {
-                assert(is_valid(&mem, i) == true);
-        }
-}
+        shadow_memory_exit(&mem);
 
-void
-is_valid_region_after_all_validated_by_validate_all()
-{
         shadow_memory_init(&mem, MEM_SIZE);
-        validate_region(&mem, 0, MEM_SIZE - 1);
-        assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == true);
-}
 
-void
-is_invalid_after_invalidate()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
-        validate_region(&mem, 0, MEM_SIZE - 1);
-        invalidate(&mem, INVALID_IDX);
-        for (uint32_t i = 0; i < MEM_SIZE; ++i) {
-                if (i != INVALID_IDX) {
-                        assert(is_valid(&mem, i) == true);
-                } else {
-                        assert(is_valid(&mem, i) == false);
-                }
-        }
-}
-
-void
-is_invalid_after_invalidated_by_invalidate_all()
-{
-        shadow_memory_init(&mem, MEM_SIZE);
         validate_region(&mem, 0, MEM_SIZE - 1);
         invalidate_region(&mem, 0, MEM_SIZE - 1);
+
         for (uint32_t i = 0; i < MEM_SIZE; ++i) {
                 assert(is_valid(&mem, i) == false);
         }
+        assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == false);
+
+        shadow_memory_exit(&mem);
 }
 
 void
-is_invalid_region_after_invalidate()
+test_validate_region(void)
 {
         shadow_memory_init(&mem, MEM_SIZE);
+
+        validate_region(&mem, 0, MEM_SIZE - 1);
+        assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == true);
+
+        shadow_memory_exit(&mem);
+}
+
+void
+test_invalidate_region(void)
+{
+        shadow_memory_init(&mem, MEM_SIZE);
+
         validate_region(&mem, 0, MEM_SIZE - 1);
         invalidate_region(&mem, 0, MEM_SIZE - 1);
         assert(is_valid_region(&mem, 0, MEM_SIZE - 1) == false);
+
+        shadow_memory_exit(&mem);
+}
+
+void
+test_validate(void)
+{
+        shadow_memory_init(&mem, MEM_SIZE);
+
+        validate(&mem, 0);
+        assert(is_valid(&mem, 0) == true);
+
+        assert(is_valid(&mem, 1) == false);
+        assert(is_valid(&mem, 2) == false);
+
+        validate(&mem, 3);
+        assert(is_valid(&mem, 3) == true);
+
+        assert(is_valid(&mem, 4) == false);
+
+        shadow_memory_exit(&mem);
+}
+
+void
+test_invalidate(void)
+{
+        shadow_memory_init(&mem, MEM_SIZE);
+
+        validate_region(&mem, 0, MEM_SIZE - 1);
+        invalidate(&mem, 0);
+        assert(is_valid(&mem, 0) == false);
+        assert(is_valid(&mem, 1) == true);
+
+        shadow_memory_exit(&mem);
+}
+
+void
+test_partial_validation(void)
+{
+        shadow_memory_init(&mem, MEM_SIZE);
+
+        validate_region(&mem, 0, MEM_SIZE / 2 - 1);
+        assert(is_valid_region(&mem, 0, MEM_SIZE / 2 - 1) == true);
+        assert(is_valid_region(&mem, MEM_SIZE / 2, MEM_SIZE - 1) == false);
+
+        shadow_memory_exit(&mem);
+}
+
+void
+test_partial_invalidation(void)
+{
+        shadow_memory_init(&mem, MEM_SIZE);
+
+        validate_region(&mem, 0, MEM_SIZE - 1);
+        invalidate_region(&mem, MEM_SIZE / 2, MEM_SIZE - 1);
+        assert(is_valid_region(&mem, 0, MEM_SIZE / 2 - 1) == true);
+        assert(is_valid_region(&mem, MEM_SIZE / 2, MEM_SIZE - 1) == false);
+
+        shadow_memory_exit(&mem);
 }
 
 int
-main()
+main(void)
 {
-        is_valid_after_init();
-        is_valid_region_after_init();
+        test_shadow_memory_init();
+        test_is_valid_region();
+        test_validate_region();
+        test_invalidate_region();
+        test_validate();
+        test_invalidate();
+        test_partial_validation();
+        test_partial_invalidation();
 
-        is_valid_after_validate();
-        is_valid_region_after_validate();
-
-        is_valid_after_all_validated();
-        is_valid_region_after_all_validated();
-        is_valid_after_all_validated_by_validate_all();
-        is_valid_region_after_all_validated_by_validate_all();
-
-        is_invalid_after_invalidate();
-        is_invalid_region_after_invalidate();
-
-        is_invalid_after_invalidated_by_invalidate_all();
-
-        printf("tests successfull\n");
+        printf("mem_addr_validator tests successfull\n");
         return 0;
 }
