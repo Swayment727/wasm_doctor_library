@@ -61,3 +61,9 @@ doctor_init(uint32_t size_in_pages)
 {
         shadow_memory_init(&mem, WASM_PAGE_SIZE * size_in_pages * 8);
 }
+
+void
+doctor_exit(void)
+{
+        shadow_memory_exit(&mem);
+}

@@ -67,3 +67,9 @@ shadow_memory_init(struct shadow_memory *mem, uint32_t mem_size)
                                       sizeof(word_t));
         invalidate_region(mem, 0, mem_size);
 }
+
+void
+shadow_memory_exit(struct shadow_memory *mem)
+{
+        free(mem->words);
+}
