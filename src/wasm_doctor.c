@@ -2,12 +2,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "heap_use_validator.h"
 #include "mem_addr_validator.h"
 #include "wasm_doctor.h"
 
 #define WASM_PAGE_SIZE 65536
 
 static struct shadow_memory mem;
+static struct heap_use_validator validator;
 
 static wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
@@ -53,6 +55,18 @@ shadow_load(wasmptr_t address, uint32_t size)
         return is_valid_region(&mem, address * 8, address * 8 + size - 1);
 }
 
+void
+doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes)
+{
+        register_malloc(&validator, block_start, size_in_bytes);
+}
+
+void
+doctor_register_free(wasmptr_t block_start)
+{
+        register_free(&validator, block_start);
+}
+
 /**
  * @param[in] size_in_pages Size of WebAssembly memory in pages.
  */
@@ -66,4 +80,5 @@ void
 doctor_exit(void)
 {
         shadow_memory_exit(&mem);
+        heap_use_validator_exit(&validator);
 }

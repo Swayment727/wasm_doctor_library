@@ -9,6 +9,8 @@ typedef uint32_t wasmptr_t;
 void move_shadow_stack_pointer(wasmptr_t address);
 void shadow_store(wasmptr_t address, uint32_t size);
 bool shadow_load(wasmptr_t address, uint32_t size);
+void doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes);
+void doctor_register_free(wasmptr_t block_start);
 void doctor_init(uint32_t size_in_pages);
 void doctor_exit(void);
 
