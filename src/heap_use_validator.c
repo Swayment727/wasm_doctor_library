@@ -11,7 +11,7 @@ register_malloc(struct heap_use_validator *validator, wasmptr_t block_start,
         // TODO: check the first realloc
         validator->blocks = (struct allocated_block *)realloc(
                 validator->blocks,
-                sizeof(struct allocated_block) * ++validator->blocks_size);
+                sizeof(*validator->blocks) * ++validator->blocks_size);
         validator->blocks[validator->blocks_size - 1].block_start =
                 block_start;
         validator->blocks[validator->blocks_size - 1].size_in_bytes =
@@ -47,3 +47,5 @@ heap_use_validator_exit(struct heap_use_validator *validator)
 
         free(validator->blocks);
 }
+
+// TODO: Add a reporter that aggregates the errors and possibly prints them

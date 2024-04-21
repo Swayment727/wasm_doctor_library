@@ -3,13 +3,15 @@
 #include <stdio.h>
 
 #include "heap_use_validator.h"
+#include "local_validator.h"
 #include "mem_addr_validator.h"
 #include "wasm_doctor.h"
 
 #define WASM_PAGE_SIZE 65536
 
 static struct shadow_memory mem;
-static struct heap_use_validator validator;
+static struct heap_use_validator heap_validator;
+static struct local_validator local_validator;
 
 static wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
@@ -38,7 +40,7 @@ move_shadow_stack_pointer(wasmptr_t address)
  * @param[in] size Size of the store in bits.
  */
 void
-shadow_store(wasmptr_t address, uint32_t size)
+doctor_store(wasmptr_t address, uint32_t size)
 {
         printf("store from %u to %u\n", address * 8, address * 8 + size - 1);
         validate_region(&mem, address * 8, address * 8 + size - 1);
@@ -49,7 +51,7 @@ shadow_store(wasmptr_t address, uint32_t size)
  * @param[in] size Size of the load in bits.
  */
 bool
-shadow_load(wasmptr_t address, uint32_t size)
+doctor_load(wasmptr_t address, uint32_t size)
 {
         printf("load from %u to %u\n", address * 8, address * 8 + size - 1);
         return is_valid_region(&mem, address * 8, address * 8 + size - 1);
@@ -58,13 +60,39 @@ shadow_load(wasmptr_t address, uint32_t size)
 void
 doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes)
 {
-        register_malloc(&validator, block_start, size_in_bytes);
+        register_malloc(&heap_validator, block_start, size_in_bytes);
 }
 
 void
 doctor_register_free(wasmptr_t block_start)
 {
-        register_free(&validator, block_start);
+        register_free(&heap_validator, block_start);
+}
+
+void
+doctor_local_set(uint32_t idx)
+{
+        register_set(&local_validator, idx);
+}
+
+void
+doctor_local_get(uint32_t idx)
+{
+        if (!validate_get(&local_validator, idx)) {
+                printf("invalid local get detected\n");
+        }
+}
+
+void
+doctor_frame_enter(uint32_t locals_size)
+{
+        local_validator_frame_enter(&local_validator, locals_size);
+}
+
+void
+doctor_frame_exit(void)
+{
+        local_validator_frame_exit(&local_validator);
 }
 
 /**
@@ -80,5 +108,5 @@ void
 doctor_exit(void)
 {
         shadow_memory_exit(&mem);
-        heap_use_validator_exit(&validator);
+        heap_use_validator_exit(&heap_validator);
 }

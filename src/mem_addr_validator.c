@@ -63,9 +63,8 @@ is_valid_region(struct shadow_memory *mem, uint32_t bit_idx_start,
 void
 shadow_memory_init(struct shadow_memory *mem, uint32_t mem_size)
 {
-        mem->words = (word_t *)malloc(mem_size / sizeof(*mem->words) *
-                                      sizeof(word_t));
-        invalidate_region(mem, 0, mem_size);
+        mem->words = (word_t *)malloc(mem_size);
+        invalidate_region(mem, 0, mem_size - 1);
 }
 
 void

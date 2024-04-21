@@ -18,7 +18,7 @@ all: compile test
 .PHONY: compile
 compile: $(BUILD_DIR)/$(TARGET).a
 
-$(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/mem_addr_validator.o $(BUILD_DIR)/heap_use_validator.o
+$(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/mem_addr_validator.o $(BUILD_DIR)/heap_use_validator.o $(BUILD_DIR)/local_validator.o
 	ar rcs $@ $^
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(SOURCE_DIR)/%.h
