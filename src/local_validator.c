@@ -25,6 +25,10 @@ local_validator_frame_enter(struct local_validator *validator,
                 ++validator->frames_size * sizeof(*validator->locals));
         validator->locals[validator->frames_size - 1] =
                 (bool *)malloc(locals_size * sizeof(**validator->locals));
+
+        for (uint32_t i = 0; i < locals_size; ++i) {
+                validator->locals[validator->frames_size - 1][i] = false;
+        }
 }
 
 void
