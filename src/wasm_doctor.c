@@ -13,6 +13,11 @@ struct shadow_memory mem;
 struct heap_use_validator heap_validator;
 struct local_validator local_validator;
 
+/**
+ * Shadow stack pointer is initially set to the highest address. Because of
+ * this the first call of move_shadow_stack_pointer function sets it to the
+ * actual start of the shadow stack.
+ */
 wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
 /**
