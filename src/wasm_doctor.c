@@ -9,11 +9,11 @@
 
 #define WASM_PAGE_SIZE 65536
 
-static struct shadow_memory mem;
-static struct heap_use_validator heap_validator;
-static struct local_validator local_validator;
+struct shadow_memory mem;
+struct heap_use_validator heap_validator;
+struct local_validator local_validator;
 
-static wasmptr_t shadow_stack_pointer = UINT32_MAX;
+wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
 /**
  * @brief Move the shadow stack pointer to its new position. If the stack size
