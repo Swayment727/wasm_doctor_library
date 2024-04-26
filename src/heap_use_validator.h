@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef uint32_t wasmptr_t;
+#include "wasm_types.h"
 
 struct heap_use_validator {
         uint32_t blocks_size;

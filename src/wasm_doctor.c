@@ -2,12 +2,15 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "error_reporter.h"
 #include "heap_use_validator.h"
 #include "local_validator.h"
 #include "mem_addr_validator.h"
 #include "wasm_doctor.h"
 
 #define WASM_PAGE_SIZE 65536
+
+struct error_reporter reporter;
 
 struct shadow_memory mem;
 struct heap_use_validator heap_validator;
@@ -59,7 +62,15 @@ bool
 doctor_load(wasmptr_t address, uint32_t size)
 {
         printf("load from %u to %u\n", address * 8, address * 8 + size - 1);
-        return is_valid_region(&mem, address * 8, address * 8 + size - 1);
+        bool is_valid =
+                is_valid_region(&mem, address * 8, address * 8 + size - 1);
+
+        if (!is_valid) {
+                reporter.undefined_memory_use_errors
+                        [reporter.undefined_memory_use_errors_size++];
+        }
+
+        return is_valid;
 }
 
 void
@@ -114,4 +125,5 @@ doctor_exit(void)
 {
         shadow_memory_exit(&mem);
         heap_use_validator_exit(&heap_validator);
+        report(&reporter);
 }

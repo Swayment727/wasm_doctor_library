@@ -17,6 +17,9 @@ register_malloc(struct heap_use_validator *validator, wasmptr_t block_start,
         validator->blocks[validator->blocks_size - 1].size_in_bytes =
                 size_in_bytes;
         validator->blocks[validator->blocks_size - 1].freed = false;
+
+        printf("------------------- malloced from %u - %u\n", block_start,
+               block_start + size_in_bytes);
 }
 
 void
