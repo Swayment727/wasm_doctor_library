@@ -87,11 +87,7 @@ doctor_local_set(uint32_t idx)
 void
 doctor_local_get(uint32_t idx)
 {
-        if (!validate_get(&local_validator, idx)) {
-                printf("invalid local get detected\n");
-                add_undefined_local_use(&reporter, idx, 42, // TODO: add size
-                                        ""); // TODO: add function name
-        }
+        validate_get(&local_validator, idx);
 }
 
 void
