@@ -42,5 +42,9 @@ local_validator_init(struct local_validator *validator, struct error_reporter *r
 void
 local_validator_exit(struct local_validator *validator)
 {
+        for (uint32_t i = 0; i < validator->frames_size; ++i) {
+                free(validator->locals[i]);
+        }
+
         free(validator->locals);
 }
