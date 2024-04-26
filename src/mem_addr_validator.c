@@ -12,29 +12,25 @@ validate(struct mem_addr_validator *validator, uint32_t bit_idx)
 {
         /* printf("%u %lu %lu\n", bit_idx, BYTES_PER_WORD, */
         /* bit_idx / BYTES_PER_WORD); */
-        validator->words[bit_idx / BYTES_PER_WORD] |=
-                1 << bit_idx % BYTES_PER_WORD;
+        validator->words[bit_idx / BYTES_PER_WORD] |= 1 << bit_idx % BYTES_PER_WORD;
 }
 
 void
 invalidate(struct mem_addr_validator *validator, uint32_t bit_idx)
 {
-        validator->words[bit_idx / BYTES_PER_WORD] &=
-                ~(1 << bit_idx % BYTES_PER_WORD);
+        validator->words[bit_idx / BYTES_PER_WORD] &= ~(1 << bit_idx % BYTES_PER_WORD);
 }
 
 void
 check_access(struct mem_addr_validator *validator, uint32_t bit_idx)
 {
-        if ((validator->words[bit_idx / BYTES_PER_WORD] &
-             (1 << bit_idx % BYTES_PER_WORD)) == 0) {
+        if ((validator->words[bit_idx / BYTES_PER_WORD] & (1 << bit_idx % BYTES_PER_WORD)) == 0) {
                 // TODO: report
         }
 }
 
 void
-validate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start,
-                uint32_t bit_idx_end)
+validate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start, uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
                 validate(validator, i);
@@ -42,8 +38,7 @@ validate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start,
 }
 
 void
-invalidate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start,
-                  uint32_t bit_idx_end)
+invalidate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start, uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
                 invalidate(validator, i);
@@ -51,8 +46,7 @@ invalidate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start,
 }
 
 void
-check_region_access(struct mem_addr_validator *validator,
-                    uint32_t bit_idx_start, uint32_t bit_idx_end)
+check_region_access(struct mem_addr_validator *validator, uint32_t bit_idx_start, uint32_t bit_idx_end)
 {
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
                 check_access(validator, i);
@@ -60,8 +54,7 @@ check_region_access(struct mem_addr_validator *validator,
 }
 
 void
-mem_addr_validator_init(struct mem_addr_validator *validator,
-                        uint32_t mem_size, struct error_reporter *reporter)
+mem_addr_validator_init(struct mem_addr_validator *validator, uint32_t mem_size, struct error_reporter *reporter)
 {
         validator->words = (word_t *)malloc(mem_size);
         invalidate_region(validator, 0, mem_size - 1);

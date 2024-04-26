@@ -1,0 +1,26 @@
+#!/bin/sh
+
+GIT_DIFF=$(git diff --cached --name-only)
+
+if [[ $(clang-format --version | awk '{ print $NF }' | awk -F'.' '{ print $1 }') -ge 15 ]]; then
+    case "$GIT_DIFF" in
+        (*.[ch]pp|*.[ch])
+            echo 'Formatting using clang-format...'
+
+            for FILE in $GIT_DIFF
+            do
+                if [[ $FILE == *.[ch]pp ]] || [[ $FILE == *.[ch] ]]; then
+                    clang-format -i --style=file $FILE
+                    echo "[$FILE] formatted"
+
+                    git add "$FILE"
+                fi
+            done
+
+            echo 'Formatting complete'
+            echo
+            ;;
+    esac
+else
+  echo "Formatting script requires clang-format version >= 15"
+fi

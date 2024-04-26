@@ -3,13 +3,13 @@
 uint64_t
 foo()
 {
-    uint64_t *ptr;
-    *ptr = 42;
-    return *ptr;
+        uint64_t *ptr;
+        *ptr = 42;
+        return *ptr;
 }
 
 int
 main()
 {
-    return foo();
+        return foo();
 }

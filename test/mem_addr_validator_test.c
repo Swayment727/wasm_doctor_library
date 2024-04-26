@@ -111,10 +111,8 @@ test_partial_validation(void)
         mem_addr_validator_init(&mem_validator, MEM_SIZE);
 
         check_region(&mem_validator, 0, MEM_SIZE / 2 - 1);
-        assert(check_region_access(&mem_validator, 0, MEM_SIZE / 2 - 1) ==
-               true);
-        assert(check_region_access(&mem_validator, MEM_SIZE / 2,
-                                   MEM_SIZE - 1) == false);
+        assert(check_region_access(&mem_validator, 0, MEM_SIZE / 2 - 1) == true);
+        assert(check_region_access(&mem_validator, MEM_SIZE / 2, MEM_SIZE - 1) == false);
 
         mem_addr_validator_exit(&mem_validator);
 }
@@ -126,10 +124,8 @@ test_partial_invalidation(void)
 
         check_region(&mem_validator, 0, MEM_SIZE - 1);
         invalidate_region(&mem_validator, MEM_SIZE / 2, MEM_SIZE - 1);
-        assert(check_region_access(&mem_validator, 0, MEM_SIZE / 2 - 1) ==
-               true);
-        assert(check_region_access(&mem_validator, MEM_SIZE / 2,
-                                   MEM_SIZE - 1) == false);
+        assert(check_region_access(&mem_validator, 0, MEM_SIZE / 2 - 1) == true);
+        assert(check_region_access(&mem_validator, MEM_SIZE / 2, MEM_SIZE - 1) == false);
 
         mem_addr_validator_exit(&mem_validator);
 }

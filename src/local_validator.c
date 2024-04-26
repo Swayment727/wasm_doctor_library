@@ -17,14 +17,10 @@ validate_get(struct local_validator *validator, uint32_t local_idx)
 }
 
 void
-local_validator_frame_enter(struct local_validator *validator,
-                            uint32_t locals_size)
+local_validator_frame_enter(struct local_validator *validator, uint32_t locals_size)
 {
-        validator->locals = (bool **)realloc(
-                validator->locals,
-                ++validator->frames_size * sizeof(*validator->locals));
-        validator->locals[validator->frames_size - 1] =
-                (bool *)malloc(locals_size * sizeof(**validator->locals));
+        validator->locals = (bool **)realloc(validator->locals, ++validator->frames_size * sizeof(*validator->locals));
+        validator->locals[validator->frames_size - 1] = (bool *)malloc(locals_size * sizeof(**validator->locals));
 
         for (uint32_t i = 0; i < locals_size; ++i) {
                 validator->locals[validator->frames_size - 1][i] = false;
@@ -38,8 +34,7 @@ local_validator_frame_exit(struct local_validator *validator)
 }
 
 void
-local_validator_init(struct local_validator *validator,
-                     struct error_reporter *reporter)
+local_validator_init(struct local_validator *validator, struct error_reporter *reporter)
 {
         validator->reporter = reporter;
 }

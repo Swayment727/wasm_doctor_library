@@ -35,10 +35,8 @@ void
 move_shadow_stack_pointer(wasmptr_t address)
 {
         if (address > shadow_stack_pointer) {
-                invalidate_region(&mem_validator, shadow_stack_pointer * 8,
-                                  address * 8);
-                printf("move ssp - invalidate region from %u to %u\n",
-                       shadow_stack_pointer, address);
+                invalidate_region(&mem_validator, shadow_stack_pointer * 8, address * 8);
+                printf("move ssp - invalidate region from %u to %u\n", shadow_stack_pointer, address);
         }
 
         shadow_stack_pointer = address;
@@ -62,8 +60,7 @@ doctor_store(wasmptr_t address, uint32_t size)
 void
 doctor_load(wasmptr_t address, uint32_t size)
 {
-        check_region_access(&mem_validator, address * 8,
-                            address * 8 + size - 1);
+        check_region_access(&mem_validator, address * 8, address * 8 + size - 1);
 }
 
 void
@@ -108,8 +105,7 @@ doctor_frame_exit(void)
 void
 doctor_init(uint32_t size_in_pages)
 {
-        mem_addr_validator_init(&mem_validator,
-                                WASM_PAGE_SIZE * size_in_pages * 8, &reporter);
+        mem_addr_validator_init(&mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &reporter);
         heap_use_validator_init(&heap_validator, &reporter);
         local_validator_init(&local_validator, &reporter);
 }
