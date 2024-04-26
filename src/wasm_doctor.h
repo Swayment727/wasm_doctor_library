@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef uint32_t wasmptr_t;
+#include "wasm_types.h"
 
 void move_shadow_stack_pointer(wasmptr_t address);
 void doctor_store(wasmptr_t address, uint32_t size);

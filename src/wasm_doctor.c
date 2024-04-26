@@ -7,6 +7,7 @@
 #include "local_validator.h"
 #include "mem_addr_validator.h"
 #include "wasm_doctor.h"
+#include "wasm_types.h"
 
 #define WASM_PAGE_SIZE 65536
 
