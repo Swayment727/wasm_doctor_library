@@ -37,6 +37,13 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
 }
 
 void
+heap_use_validator_init(struct heap_use_validator *validator,
+                        struct error_reporter *reporter)
+{
+        validator->reporter = reporter;
+}
+
+void
 heap_use_validator_exit(struct heap_use_validator *validator)
 {
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {

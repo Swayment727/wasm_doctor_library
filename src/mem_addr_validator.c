@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "error_reporter.h"
 #include "mem_addr_validator.h"
 
 #define BYTES_PER_WORD sizeof(word_t)
@@ -59,14 +60,17 @@ check_region_access(struct mem_addr_validator *validator,
 }
 
 void
-shadow_memory_init(struct mem_addr_validator *validator, uint32_t mem_size)
+mem_addr_validator_init(struct mem_addr_validator *validator,
+                        uint32_t mem_size, struct error_reporter *reporter)
 {
         validator->words = (word_t *)malloc(mem_size);
         invalidate_region(validator, 0, mem_size - 1);
+
+        validator->reporter = reporter;
 }
 
 void
-shadow_memory_exit(struct mem_addr_validator *validator)
+mem_addr_validator_exit(struct mem_addr_validator *validator)
 {
         free(validator->words);
 }

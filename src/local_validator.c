@@ -38,6 +38,13 @@ local_validator_frame_exit(struct local_validator *validator)
 }
 
 void
+local_validator_init(struct local_validator *validator,
+                     struct error_reporter *reporter)
+{
+        validator->reporter = reporter;
+}
+
+void
 local_validator_exit(struct local_validator *validator)
 {
         free(validator->locals);

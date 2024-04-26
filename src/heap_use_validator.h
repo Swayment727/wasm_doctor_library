@@ -4,9 +4,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "error_reporter.h"
 #include "wasm_types.h"
 
 struct heap_use_validator {
+        struct error_reporter *reporter;
         uint32_t blocks_size;
         struct allocated_block *blocks;
 };
@@ -21,6 +23,8 @@ void register_malloc(struct heap_use_validator *validator,
                      wasmptr_t block_start, uint32_t size_in_bytes);
 void register_free(struct heap_use_validator *validator,
                    wasmptr_t block_start);
+void heap_use_validator_init(struct heap_use_validator *validator,
+                             struct error_reporter *reporter);
 void heap_use_validator_exit(struct heap_use_validator *validator);
 
 #endif /* HEAP_USE_VALIDATOR */

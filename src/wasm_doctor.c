@@ -108,14 +108,18 @@ doctor_frame_exit(void)
 void
 doctor_init(uint32_t size_in_pages)
 {
-        shadow_memory_init(&mem_validator, WASM_PAGE_SIZE * size_in_pages * 8);
+        mem_addr_validator_init(&mem_validator,
+                                WASM_PAGE_SIZE * size_in_pages * 8, &reporter);
+        heap_use_validator_init(&heap_validator, &reporter);
+        local_validator_init(&local_validator, &reporter);
 }
 
 void
 doctor_exit(void)
 {
-        shadow_memory_exit(&mem_validator);
+        mem_addr_validator_exit(&mem_validator);
         heap_use_validator_exit(&heap_validator);
+        local_validator_exit(&local_validator);
         report(&reporter);
         reporter_exit(&reporter);
 }
