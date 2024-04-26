@@ -12,7 +12,7 @@
 
 struct error_reporter reporter;
 
-struct shadow_memory mem;
+struct mem_addr_validator mem_validator;
 struct heap_use_validator heap_validator;
 struct local_validator local_validator;
 
@@ -35,7 +35,8 @@ void
 move_shadow_stack_pointer(wasmptr_t address)
 {
         if (address > shadow_stack_pointer) {
-                invalidate_region(&mem, shadow_stack_pointer * 8, address * 8);
+                invalidate_region(&mem_validator, shadow_stack_pointer * 8,
+                                  address * 8);
                 printf("move ssp - invalidate region from %u to %u\n",
                        shadow_stack_pointer, address);
         }
@@ -51,26 +52,18 @@ void
 doctor_store(wasmptr_t address, uint32_t size)
 {
         printf("store from %u to %u\n", address * 8, address * 8 + size - 1);
-        validate_region(&mem, address * 8, address * 8 + size - 1);
+        validate_region(&mem_validator, address * 8, address * 8 + size - 1);
 }
 
 /**
  * @param[in] address Address of the load.
  * @param[in] size Size of the load in bits.
  */
-bool
+void
 doctor_load(wasmptr_t address, uint32_t size)
 {
-        printf("load from %u to %u\n", address * 8, address * 8 + size - 1);
-        bool is_valid =
-                is_valid_region(&mem, address * 8, address * 8 + size - 1);
-
-        if (!is_valid) {
-                reporter.undefined_memory_use_errors
-                        [reporter.undefined_memory_use_errors_size++];
-        }
-
-        return is_valid;
+        check_region_access(&mem_validator, address * 8,
+                            address * 8 + size - 1);
 }
 
 void
@@ -96,6 +89,8 @@ doctor_local_get(uint32_t idx)
 {
         if (!validate_get(&local_validator, idx)) {
                 printf("invalid local get detected\n");
+                add_undefined_local_use(&reporter, idx, 42, // TODO: add size
+                                        ""); // TODO: add function name
         }
 }
 
@@ -117,13 +112,14 @@ doctor_frame_exit(void)
 void
 doctor_init(uint32_t size_in_pages)
 {
-        shadow_memory_init(&mem, WASM_PAGE_SIZE * size_in_pages * 8);
+        shadow_memory_init(&mem_validator, WASM_PAGE_SIZE * size_in_pages * 8);
 }
 
 void
 doctor_exit(void)
 {
-        shadow_memory_exit(&mem);
+        shadow_memory_exit(&mem_validator);
         heap_use_validator_exit(&heap_validator);
         report(&reporter);
+        reporter_exit(&reporter);
 }
