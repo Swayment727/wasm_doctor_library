@@ -1,6 +1,7 @@
 #ifndef ERROR_REPORTER
 #define ERROR_REPORTER
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "wasm_state.h"
@@ -13,6 +14,7 @@ struct error_location {
 struct undefined_memory_use {
         wasmptr_t address;
         uint32_t size;
+        bool *validity;
         struct error_location location;
 };
 
@@ -59,7 +61,8 @@ struct error_reporter {
 };
 
 void report(struct error_reporter *reporter);
-void add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
+void add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, bool *validity,
+                              char *function_name);
 void add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *function_name);
 void add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);

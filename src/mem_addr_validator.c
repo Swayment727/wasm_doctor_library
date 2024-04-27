@@ -25,7 +25,8 @@ void
 check_access(struct mem_addr_validator *validator, uint32_t bit_idx)
 {
         if ((validator->words[bit_idx / BYTES_PER_WORD] & (1 << bit_idx % BYTES_PER_WORD)) == 0) {
-                add_undefined_memory_use(validator->reporter, bit_idx, validator->reporter->state->bit_size,
+                bool validity[1] = {false};
+                add_undefined_memory_use(validator->reporter, bit_idx, 1, validity,
                                          validator->reporter->state
                                                  ->function_names[validator->reporter->state->function_names_size - 1]);
         }
@@ -50,9 +51,15 @@ invalidate_region(struct mem_addr_validator *validator, uint32_t bit_idx_start, 
 void
 check_region_access(struct mem_addr_validator *validator, uint32_t bit_idx_start, uint32_t bit_idx_end)
 {
+        bool validity[bit_idx_end - bit_idx_start];
+
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
-                check_access(validator, i);
+                validity[i - bit_idx_start] = (validator->words[i / BYTES_PER_WORD] & (1 << i % BYTES_PER_WORD)) == 1;
         }
+
+        add_undefined_memory_use(
+                validator->reporter, bit_idx_start, validator->reporter->state->bit_size, validity,
+                validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1]);
 }
 
 void

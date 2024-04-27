@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +18,13 @@ report(struct error_reporter *reporter)
                        "(%s)\n",
                        reporter->undefined_memory_use_errors[i].size, reporter->undefined_memory_use_errors[i].address,
                        reporter->undefined_memory_use_errors[i].location.function_name);
+
+                printf("validity: ");
+                for (uint32_t j = 0; j < reporter->undefined_memory_use_errors[i].size; ++j) {
+                        printf("%u", reporter->undefined_memory_use_errors[i].validity[j]);
+                }
+
+                printf("\n\n");
         }
 
         for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
@@ -50,13 +58,19 @@ report(struct error_reporter *reporter)
 }
 
 void
-add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name)
+add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, bool *validity,
+                         char *function_name)
 {
         reporter->undefined_memory_use_errors =
                 realloc(reporter->undefined_memory_use_errors, ++(reporter->undefined_memory_use_errors_size) *
                                                                        sizeof(*reporter->undefined_memory_use_errors));
         reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].address = address;
         reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].size = size;
+        reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].validity = malloc(
+                size * sizeof(*(reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1]
+                                        .validity)));
+        memcpy(reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].validity, validity,
+               size);
 
         reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].location.function_name =
                 malloc(strnlen(function_name, 50) + 1);
