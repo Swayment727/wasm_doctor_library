@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 uint64_t
-foo()
+foo(void)
 {
         uint64_t *ptr = (uint64_t *)39;
         *ptr = 42;
@@ -9,7 +9,7 @@ foo()
 }
 
 int
-main()
+main(void)
 {
         return foo();
 }

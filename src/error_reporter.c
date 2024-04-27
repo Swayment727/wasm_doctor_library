@@ -8,8 +8,8 @@
 
 #define SET_FUNCTION_NAME(errors, errors_size, function_name)                                                          \
         {                                                                                                              \
-                errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);             \
-                strncpy(errors[*errors_size - 1]->location.function_name, function_name,                               \
+                (*errors)[*errors_size - 1].location.function_name = malloc(strnlen(function_name, 50) + 1);           \
+                strncpy((*errors)[*errors_size - 1].location.function_name, function_name,                             \
                         strnlen(function_name, 50) + 1);                                                               \
         }
 
@@ -77,10 +77,10 @@ add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint
         uint32_t *errors_size = &reporter->undefined_memory_use_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->address = address;
-        errors[*errors_size - 1]->size = size;
-        errors[*errors_size - 1]->validity = malloc(size * sizeof(*(errors[*errors_size - 1]->validity)));
-        memcpy(errors[*errors_size - 1]->validity, validity, size);
+        (*errors)[*errors_size - 1].address = address;
+        (*errors)[*errors_size - 1].size = size;
+        (*errors)[*errors_size - 1].validity = malloc(size * sizeof(*((*errors)[*errors_size - 1].validity)));
+        memcpy((*errors)[*errors_size - 1].validity, validity, size);
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
@@ -92,7 +92,7 @@ add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *fun
         uint32_t *errors_size = &reporter->undefined_local_use_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->idx = idx;
+        (*errors)[*errors_size - 1].idx = idx;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
@@ -104,8 +104,8 @@ add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t s
         uint32_t *errors_size = &reporter->use_after_free_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->address = address;
-        errors[*errors_size - 1]->size = size;
+        (*errors)[*errors_size - 1].address = address;
+        (*errors)[*errors_size - 1].size = size;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
@@ -117,8 +117,8 @@ add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size
         uint32_t *errors_size = &reporter->memory_leak_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->address = address;
-        errors[*errors_size - 1]->size = size;
+        (*errors)[*errors_size - 1].address = address;
+        (*errors)[*errors_size - 1].size = size;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
@@ -130,7 +130,7 @@ add_double_free(struct error_reporter *reporter, uint32_t address, char *functio
         uint32_t *errors_size = &reporter->double_free_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->address = address;
+        (*errors)[*errors_size - 1].address = address;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
@@ -142,7 +142,7 @@ add_invalid_free(struct error_reporter *reporter, uint32_t address, char *functi
         uint32_t *errors_size = &reporter->invalid_free_errors_size;
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
-        errors[*errors_size - 1]->address = address;
+        (*errors)[*errors_size - 1].address = address;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name);
 }
