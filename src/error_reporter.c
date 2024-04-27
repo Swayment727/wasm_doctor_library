@@ -6,6 +6,13 @@
 #include "error_reporter.h"
 #include "wasm_state.h"
 
+#define SET_FUNCTION_NAME(errors, errors_size, function_name)                                                          \
+        {                                                                                                              \
+                errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);             \
+                strncpy(errors[*errors_size - 1]->location.function_name, function_name,                               \
+                        strnlen(function_name, 50) + 1);                                                               \
+        }
+
 void
 report(struct error_reporter *reporter)
 {
@@ -70,9 +77,7 @@ add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint
         errors[*errors_size - 1]->validity = malloc(size * sizeof(*(errors[*errors_size - 1]->validity)));
         memcpy(errors[*errors_size - 1]->validity, validity, size);
 
-        errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);
-        strncpy(errors[*errors_size - 1]->location.function_name, function_name,
-                strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
 
 void
@@ -84,9 +89,7 @@ add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *fun
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
         errors[*errors_size - 1]->idx = idx;
 
-        errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);
-        strncpy(errors[*errors_size - 1]->location.function_name, function_name,
-                strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
 
 void
@@ -99,9 +102,7 @@ add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t s
         errors[*errors_size - 1]->address = address;
         errors[*errors_size - 1]->size = size;
 
-        errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);
-        strncpy(errors[*errors_size - 1]->location.function_name, function_name,
-                strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
 
 void
@@ -114,9 +115,7 @@ add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size
         errors[*errors_size - 1]->address = address;
         errors[*errors_size - 1]->size = size;
 
-        errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);
-        strncpy(errors[*errors_size - 1]->location.function_name, function_name,
-                strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
 
 void
@@ -127,9 +126,7 @@ add_double_free(struct error_reporter *reporter, uint32_t address, char *functio
 
         errors[*errors_size - 1]->address = address;
 
-        errors[*errors_size - 1]->location.function_name = malloc(strnlen(function_name, 50) + 1);
-        strncpy(errors[*errors_size - 1]->location.function_name, function_name,
-                strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
 }
 
 void
