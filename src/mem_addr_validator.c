@@ -53,13 +53,22 @@ check_region_access(struct mem_addr_validator *validator, uint32_t bit_idx_start
 {
         bool validity[bit_idx_end - bit_idx_start];
 
+        bool is_valid = true;
         for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
-                validity[i - bit_idx_start] = (validator->words[i / BYTES_PER_WORD] & (1 << i % BYTES_PER_WORD)) == 1;
+                if ((validator->words[i / BYTES_PER_WORD] & (1 << i % BYTES_PER_WORD)) == 0) {
+                        is_valid = false;
+                        validity[i - bit_idx_start] = false;
+                } else {
+                        validity[i - bit_idx_start] = true;
+                }
         }
 
-        add_undefined_memory_use(
-                validator->reporter, bit_idx_start, validator->reporter->state->bit_size, validity,
-                validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1]);
+        if (!is_valid) {
+                add_undefined_memory_use(validator->reporter, bit_idx_start, validator->reporter->state->bit_size,
+                                         validity,
+                                         validator->reporter->state
+                                                 ->function_names[validator->reporter->state->function_names_size - 1]);
+        }
 }
 
 void

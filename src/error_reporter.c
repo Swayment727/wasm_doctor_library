@@ -149,6 +149,7 @@ reporter_exit(struct error_reporter *reporter)
 {
         for (uint32_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
                 free(reporter->undefined_memory_use_errors[i].location.function_name);
+                free(reporter->undefined_memory_use_errors[i].validity);
         }
 
         for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
