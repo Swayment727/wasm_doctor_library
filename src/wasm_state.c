@@ -9,8 +9,8 @@ enter_function(struct wasm_state *state, char *function_name)
         state->function_names =
                 realloc(state->function_names, ++state->function_names_size * sizeof(*state->function_names));
         state->function_names[state->function_names_size - 1] =
-                (char *)malloc(strlen(function_name) + 1); // TODO: check strnlen
-        strcpy(state->function_names[state->function_names_size - 1], function_name);
+                (char *)malloc(strnlen(function_name, 50) + 1); // TODO: check strnlen
+        strncpy(state->function_names[state->function_names_size - 1], function_name, strnlen(function_name, 50) + 1);
 }
 
 void
@@ -28,5 +28,9 @@ set_bit_size(struct wasm_state *state, uint32_t bit_size)
 void
 wasm_state_exit(struct wasm_state *state)
 {
+        while (state->function_names_size > 0) {
+                free(state->function_names[--state->function_names_size]);
+        }
+
         free(state->function_names);
 }
