@@ -60,6 +60,11 @@ report(struct error_reporter *reporter)
                        reporter->double_free_errors[i].location.function_name);
         }
 
+        for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
+                printf("Invalid free detected at address %u. (%s)\n", reporter->invalid_free_errors[i].address,
+                       reporter->invalid_free_errors[i].location.function_name);
+        }
+
         printf("============================================================"
                "\n");
 }
@@ -124,9 +129,22 @@ add_double_free(struct error_reporter *reporter, uint32_t address, char *functio
         struct double_free **errors = &reporter->double_free_errors;
         uint32_t *errors_size = &reporter->double_free_errors_size;
 
+        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
         errors[*errors_size - 1]->address = address;
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
+}
+
+void
+add_invalid_free(struct error_reporter *reporter, uint32_t address, char *function_name)
+{
+        struct invalid_free **errors = &reporter->invalid_free_errors;
+        uint32_t *errors_size = &reporter->invalid_free_errors_size;
+
+        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        errors[*errors_size - 1]->address = address;
+
+        SET_FUNCTION_NAME(errors, errors_size, function_name);
 }
 
 void
@@ -159,11 +177,16 @@ reporter_exit(struct error_reporter *reporter)
                 free(reporter->double_free_errors[i].location.function_name);
         }
 
+        for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
+                free(reporter->invalid_free_errors[i].location.function_name);
+        }
+
         free(reporter->undefined_memory_use_errors);
         free(reporter->undefined_local_use_errors);
         free(reporter->use_after_free_errors);
         free(reporter->memory_leak_errors);
         free(reporter->double_free_errors);
+        free(reporter->invalid_free_errors);
 
         wasm_state_exit(reporter->state);
 }
