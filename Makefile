@@ -2,7 +2,7 @@ TARGET = libwasmdoctor
 TARGET_TEST = build/test/test
 
 CC = gcc
-CFLAGS = -Wall -pedantic -fPIC
+CFLAGS = -Wall -pedantic -fPIC -g
 
 SOURCE_DIR = src
 BUILD_DIR = build

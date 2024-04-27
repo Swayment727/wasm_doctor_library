@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "error_reporter.h"
 #include "local_validator.h"
 
 void
@@ -10,10 +11,14 @@ register_set(struct local_validator *validator, uint32_t local_idx)
         validator->locals[validator->frames_size - 1][local_idx] = true;
 }
 
-bool
+void
 validate_get(struct local_validator *validator, uint32_t local_idx)
 {
-        return validator->locals[validator->frames_size - 1][local_idx];
+        if (!validator->locals[validator->frames_size - 1][local_idx]) {
+                add_undefined_local_use(validator->reporter, local_idx,
+                                        validator->reporter->state
+                                                ->function_names[validator->reporter->state->function_names_size - 1]);
+        }
 }
 
 void

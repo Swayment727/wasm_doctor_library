@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "error_reporter.h"
+#include "wasm_state.h"
 
 void
 report(struct error_reporter *reporter)
@@ -19,9 +20,9 @@ report(struct error_reporter *reporter)
         }
 
         for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
-                printf("Undefined value of size %u bytes read from local %u. "
+                printf("Undefined local with index %u read. "
                        "(%s)\n",
-                       reporter->undefined_local_use_errors[i].size, reporter->undefined_local_use_errors[i].idx,
+                       reporter->undefined_local_use_errors[i].idx,
                        reporter->undefined_local_use_errors[i].location.function_name);
         }
 
@@ -65,13 +66,12 @@ add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint
 }
 
 void
-add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, uint32_t size, char *function_name)
+add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *function_name)
 {
         reporter->undefined_local_use_errors =
                 realloc(reporter->undefined_local_use_errors,
                         ++(reporter->undefined_local_use_errors_size) * sizeof(*reporter->undefined_local_use_errors));
         reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1].idx = idx;
-        reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1].size = size;
 
         reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1].location.function_name =
                 malloc(strnlen(function_name, 50) + 1);
@@ -158,4 +158,6 @@ reporter_exit(struct error_reporter *reporter)
         free(reporter->use_after_free_errors);
         free(reporter->memory_leak_errors);
         free(reporter->double_free_errors);
+
+        wasm_state_exit(reporter->state);
 }

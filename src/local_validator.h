@@ -13,7 +13,7 @@ struct local_validator {
 };
 
 void register_set(struct local_validator *validator, uint32_t local_idx);
-bool validate_get(struct local_validator *validator, uint32_t local_idx);
+void validate_get(struct local_validator *validator, uint32_t local_idx);
 void local_validator_frame_enter(struct local_validator *validator, uint32_t locals_size);
 void local_validator_frame_exit(struct local_validator *validator);
 void local_validator_init(struct local_validator *validator, struct error_reporter *reporter);
