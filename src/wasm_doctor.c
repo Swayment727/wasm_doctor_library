@@ -7,11 +7,13 @@
 #include "local_validator.h"
 #include "mem_addr_validator.h"
 #include "wasm_doctor.h"
+#include "wasm_state.h"
 #include "wasm_types.h"
 
 #define WASM_PAGE_SIZE 65536
 
 struct error_reporter reporter;
+struct wasm_state state;
 
 struct mem_addr_validator mem_validator;
 struct heap_use_validator heap_validator;
@@ -45,23 +47,24 @@ move_shadow_stack_pointer(wasmptr_t address)
 
 /**
  * @param[in] address Address of the store.
- * @param[in] size Size of the store in bits.
+ * @param[in] bit_size Size of the store in bits.
  */
 void
-doctor_store(wasmptr_t address, uint32_t size)
+doctor_store(wasmptr_t address, uint32_t bit_size)
 {
-        printf("store from %u to %u\n", address * 8, address * 8 + size - 1);
-        validate_region(&mem_validator, address * 8, address * 8 + size - 1);
+        set_bit_size(reporter.state, bit_size);
+        validate_region(&mem_validator, address * 8, address * 8 + bit_size - 1);
 }
 
 /**
  * @param[in] address Address of the load.
- * @param[in] size Size of the load in bits.
+ * @param[in] bit_size Size of the load in bits.
  */
 void
-doctor_load(wasmptr_t address, uint32_t size)
+doctor_load(wasmptr_t address, uint32_t bit_size)
 {
-        check_region_access(&mem_validator, address * 8, address * 8 + size - 1);
+        set_bit_size(reporter.state, bit_size);
+        check_region_access(&mem_validator, address * 8, address * 8 + bit_size - 1);
 }
 
 void
@@ -89,14 +92,16 @@ doctor_local_get(uint32_t idx)
 }
 
 void
-doctor_frame_enter(uint32_t locals_size)
+doctor_frame_enter(uint32_t locals_size, char *function_name)
 {
+        enter_function(reporter.state, function_name);
         local_validator_frame_enter(&local_validator, locals_size);
 }
 
 void
 doctor_frame_exit(void)
 {
+        exit_function(reporter.state);
         local_validator_frame_exit(&local_validator);
 }
 
@@ -106,6 +111,7 @@ doctor_frame_exit(void)
 void
 doctor_init(uint32_t size_in_pages)
 {
+        reporter_init(&reporter, &state);
         mem_addr_validator_init(&mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &reporter);
         heap_use_validator_init(&heap_validator, &reporter);
         local_validator_init(&local_validator, &reporter);

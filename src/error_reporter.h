@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "wasm_state.h"
 #include "wasm_types.h"
 
 struct error_location {
@@ -39,6 +40,8 @@ struct double_free {
 };
 
 struct error_reporter {
+        struct wasm_state *state;
+
         uint32_t undefined_memory_use_errors_size;
         struct undefined_memory_use *undefined_memory_use_errors;
 
@@ -61,6 +64,7 @@ void add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, uint
 void add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_doubled_free(struct error_reporter *reporter, uint32_t address, char *function_name);
+void reporter_init(struct error_reporter *reporter, struct wasm_state *state);
 void reporter_exit(struct error_reporter *reporter);
 
 #endif /* ERROR_REPORTER */

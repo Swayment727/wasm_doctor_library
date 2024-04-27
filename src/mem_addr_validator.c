@@ -25,8 +25,9 @@ void
 check_access(struct mem_addr_validator *validator, uint32_t bit_idx)
 {
         if ((validator->words[bit_idx / BYTES_PER_WORD] & (1 << bit_idx % BYTES_PER_WORD)) == 0) {
-                // TODO: change 42 - design change
-                add_undefined_memory_use(validator->reporter, bit_idx, 42, "change");
+                add_undefined_memory_use(validator->reporter, bit_idx, validator->reporter->state->bit_size,
+                                         validator->reporter->state
+                                                 ->function_names[validator->reporter->state->function_names_size - 1]);
         }
 }
 

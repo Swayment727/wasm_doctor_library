@@ -58,10 +58,10 @@ add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint
         reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].size = size;
 
         reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1].location.function_name =
-                malloc(strnlen(function_name, 50));
+                malloc(strnlen(function_name, 50) + 1);
         strncpy(reporter->undefined_memory_use_errors[reporter->undefined_memory_use_errors_size - 1]
                         .location.function_name,
-                function_name, strnlen(function_name, 50)); // TODO: decide strncpy vs strcpy
+                function_name, strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
 }
 
 void
@@ -74,10 +74,10 @@ add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, uint32_t 
         reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1].size = size;
 
         reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1].location.function_name =
-                malloc(strnlen(function_name, 50));
+                malloc(strnlen(function_name, 50) + 1);
         strncpy(reporter->undefined_local_use_errors[reporter->undefined_local_use_errors_size - 1]
                         .location.function_name,
-                function_name, strnlen(function_name, 50)); // TODO: decide strncpy vs strcpy
+                function_name, strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
 }
 
 void
@@ -90,9 +90,9 @@ add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t s
         reporter->use_after_free_errors[reporter->use_after_free_errors_size - 1].size = size;
 
         reporter->use_after_free_errors[reporter->use_after_free_errors_size - 1].location.function_name =
-                malloc(strnlen(function_name, 50));
+                malloc(strnlen(function_name, 50) + 1);
         strncpy(reporter->use_after_free_errors[reporter->use_after_free_errors_size - 1].location.function_name,
-                function_name, strnlen(function_name, 50)); // TODO: decide strncpy vs strcpy
+                function_name, strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
 }
 
 void
@@ -105,9 +105,9 @@ add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size
         reporter->memory_leak_errors[reporter->memory_leak_errors_size - 1].size = size;
 
         reporter->memory_leak_errors[reporter->memory_leak_errors_size - 1].location.function_name =
-                malloc(strnlen(function_name, 50));
+                malloc(strnlen(function_name, 50) + 1);
         strncpy(reporter->memory_leak_errors[reporter->memory_leak_errors_size - 1].location.function_name,
-                function_name, strnlen(function_name, 50)); // TODO: decide strncpy vs strcpy
+                function_name, strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
 }
 
 void
@@ -119,9 +119,15 @@ add_doubled_free(struct error_reporter *reporter, uint32_t address, char *functi
         reporter->double_free_errors[reporter->double_free_errors_size - 1].address = address;
 
         reporter->double_free_errors[reporter->double_free_errors_size - 1].location.function_name =
-                malloc(strnlen(function_name, 50));
+                malloc(strnlen(function_name, 50) + 1);
         strncpy(reporter->double_free_errors[reporter->double_free_errors_size - 1].location.function_name,
-                function_name, strnlen(function_name, 50)); // TODO: decide strncpy vs strcpy
+                function_name, strnlen(function_name, 50) + 1); // TODO: decide strncpy vs strcpy
+}
+
+void
+reporter_init(struct error_reporter *reporter, struct wasm_state *state)
+{
+        reporter->state = state;
 }
 
 void
