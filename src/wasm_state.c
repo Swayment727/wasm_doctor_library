@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,7 +23,6 @@ void
 set_bit_size(struct wasm_state *state, uint32_t bit_size)
 {
         state->bit_size = bit_size;
-        printf("state->bit_size %u %u\n", state->bit_size, bit_size);
 }
 
 void

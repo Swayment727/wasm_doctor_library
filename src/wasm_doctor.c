@@ -52,7 +52,6 @@ move_shadow_stack_pointer(wasmptr_t address)
 void
 doctor_store(wasmptr_t address, uint32_t bit_size)
 {
-        set_bit_size(reporter.state, bit_size);
         validate_region(&mem_validator, address * 8, address * 8 + bit_size - 1);
 }
 
@@ -63,7 +62,6 @@ doctor_store(wasmptr_t address, uint32_t bit_size)
 void
 doctor_load(wasmptr_t address, uint32_t bit_size)
 {
-        printf("==============bit_size %u/n", bit_size);
         set_bit_size(reporter.state, bit_size);
         check_region_access(&mem_validator, address * 8, address * 8 + bit_size - 1);
 }
