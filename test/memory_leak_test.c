@@ -45,17 +45,18 @@ test_memory_leak(void)
         assert(doctor.reporter.memory_leak_errors_size == 0);
 
         wasmptr_t address = 42;
+        uint32_t size_in_bytes = 100;
 
-        doctor_register_malloc(address, 100);
+        doctor_register_malloc(address, size_in_bytes);
 
         assert(doctor.reporter.memory_leak_errors_size == 0);
-
         doctor_frame_exit();
 
         doctor_exit(false);
 
         assert(doctor.reporter.memory_leak_errors_size == 1);
-        assert(doctor.reporter.memory_leak_errors[0].address == address);
+        assert(doctor.reporter.memory_leak_errors[doctor.reporter.memory_leak_errors_size - 1].address == address);
+        assert(doctor.reporter.memory_leak_errors[doctor.reporter.memory_leak_errors_size - 1].size == size_in_bytes);
         assert(strncmp(doctor.reporter.memory_leak_errors[0].location.function_name, function_name,
                        strlen(function_name)) == 0);
 

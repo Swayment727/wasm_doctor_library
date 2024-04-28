@@ -48,20 +48,28 @@ test_incorrect_local_use(void)
         doctor_local_get(undefined_local_idx);
 
         assert(doctor.reporter.undefined_local_use_errors_size == 1);
+        assert(doctor.reporter.undefined_local_use_errors[doctor.reporter.undefined_local_use_errors_size - 1].idx ==
+               undefined_local_idx);
 
         doctor_local_get(undefined_local_idx);
 
         assert(doctor.reporter.undefined_local_use_errors_size == 2);
+        assert(doctor.reporter.undefined_local_use_errors[doctor.reporter.undefined_local_use_errors_size - 1].idx ==
+               undefined_local_idx);
 
         uint32_t undefined_local_idx_2 = 4;
         doctor_local_get(undefined_local_idx_2);
 
         assert(doctor.reporter.undefined_local_use_errors_size == 3);
+        assert(doctor.reporter.undefined_local_use_errors[doctor.reporter.undefined_local_use_errors_size - 1].idx ==
+               undefined_local_idx_2);
 
         doctor_local_set(undefined_local_idx_2);
         doctor_local_get(undefined_local_idx_2);
 
         assert(doctor.reporter.undefined_local_use_errors_size == 3);
+        assert(doctor.reporter.undefined_local_use_errors[doctor.reporter.undefined_local_use_errors_size - 1].idx ==
+               undefined_local_idx_2);
 
         doctor_frame_exit();
 

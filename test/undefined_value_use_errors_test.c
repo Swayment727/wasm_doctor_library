@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "wasm_doctor.h"
 #include "wasm_types.h"
@@ -55,10 +56,17 @@ test_incorrect_memory_use(void)
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 3);
 
-        wasmptr_t invalid_address = 60;
+        wasmptr_t invalid_address = address + 10;
         doctor_load(invalid_address, bit_size);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 4);
+        assert(doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
+                       .address == invalid_address * 8);
+        bool validity[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                           1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        assert(memcmp(doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
+                              .validity,
+                      validity, bit_size));
 
         doctor_load(address, bit_size);
 
