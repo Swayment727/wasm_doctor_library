@@ -107,6 +107,7 @@ void
 doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages)
 {
         doctor = wasm_doctor;
+        wasm_state_init(&doctor->state);
         reporter_init(&doctor->reporter, &doctor->state);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &doctor->reporter);
         heap_use_validator_init(&doctor->heap_validator, &doctor->reporter);
@@ -121,4 +122,5 @@ doctor_exit(void)
         local_validator_exit(&doctor->local_validator);
         report(&doctor->reporter);
         reporter_exit(&doctor->reporter);
+        wasm_state_exit(&doctor->state);
 }

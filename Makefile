@@ -32,7 +32,7 @@ test: $(TARGET_TEST) run-test
 run-test:
 	./$(TARGET_TEST)
 
-$(TARGET_TEST): $(BUILD_DIR_TEST)/mem_addr_validator_test.o
+$(TARGET_TEST): $(BUILD_DIR_TEST)/wasm_doctor_test.o
 	$(CC) $(CFLAGS) -o $@ $^ -L$(BUILD_DIR) -lwasmdoctor
 
 $(BUILD_DIR_TEST)/%.o: $(SOURCE_DIR_TEST)/%.c

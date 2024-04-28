@@ -174,6 +174,24 @@ add_invalid_free(struct error_reporter *reporter, uint32_t address, char *functi
 void
 reporter_init(struct error_reporter *reporter, struct wasm_state *state)
 {
+        reporter->undefined_memory_use_errors_size = 0;
+        reporter->undefined_memory_use_errors = NULL;
+
+        reporter->undefined_local_use_errors_size = 0;
+        reporter->undefined_local_use_errors = NULL;
+
+        reporter->use_after_free_errors_size = 0;
+        reporter->use_after_free_errors = NULL;
+
+        reporter->memory_leak_errors_size = 0;
+        reporter->memory_leak_errors = NULL;
+
+        reporter->double_free_errors_size = 0;
+        reporter->double_free_errors = NULL;
+
+        reporter->invalid_free_errors_size = 0;
+        reporter->invalid_free_errors = NULL;
+
         reporter->state = state;
 }
 
@@ -211,6 +229,4 @@ reporter_exit(struct error_reporter *reporter)
         free(reporter->memory_leak_errors);
         free(reporter->double_free_errors);
         free(reporter->invalid_free_errors);
-
-        wasm_state_exit(reporter->state);
 }

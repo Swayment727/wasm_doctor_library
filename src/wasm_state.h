@@ -12,6 +12,7 @@ struct wasm_state {
 void enter_function(struct wasm_state *state, char *function_name);
 void exit_function(struct wasm_state *state);
 void set_bit_size(struct wasm_state *state, uint32_t bit_size);
+void wasm_state_init(struct wasm_state *state);
 void wasm_state_exit(struct wasm_state *state);
 
 #endif /* WASM_STATE */

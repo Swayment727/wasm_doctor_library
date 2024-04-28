@@ -65,6 +65,9 @@ check_use_after_free(struct heap_use_validator *validator, wasmptr_t address,
 void
 heap_use_validator_init(struct heap_use_validator *validator, struct error_reporter *reporter)
 {
+        validator->blocks_size = 0;
+        validator->blocks = NULL;
+
         validator->reporter = reporter;
 }
 

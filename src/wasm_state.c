@@ -26,6 +26,13 @@ set_bit_size(struct wasm_state *state, uint32_t bit_size)
 }
 
 void
+wasm_state_init(struct wasm_state *state)
+{
+        state->function_names_size = 0;
+        state->function_names = NULL;
+}
+
+void
 wasm_state_exit(struct wasm_state *state)
 {
         while (state->function_names_size > 0) {

@@ -41,6 +41,9 @@ local_validator_frame_exit(struct local_validator *validator)
 void
 local_validator_init(struct local_validator *validator, struct error_reporter *reporter)
 {
+        validator->frames_size = 0;
+        validator->locals = NULL;
+
         validator->reporter = reporter;
 }
 
