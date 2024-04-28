@@ -30,7 +30,7 @@ test_no_use_after_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] no use after free test\n");
 }
@@ -69,7 +69,7 @@ test_use_after_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] use after free test\n");
 }

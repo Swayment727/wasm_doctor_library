@@ -31,6 +31,7 @@ void doctor_frame_enter(uint32_t locals_size, char *function_name);
 void doctor_frame_exit(void);
 void doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages);
 void doctor_report(void);
-void doctor_exit(void);
+void doctor_reporter_exit(void);
+void doctor_exit(bool exit_reporter);
 
 #endif /* WASM_DOCTOR */

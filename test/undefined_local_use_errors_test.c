@@ -22,7 +22,7 @@ test_correct_local_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] correct local use test\n");
 }
@@ -65,7 +65,7 @@ test_incorrect_local_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] incorrect local use test\n");
 }

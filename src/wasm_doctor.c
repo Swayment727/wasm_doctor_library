@@ -123,11 +123,20 @@ doctor_report(void)
 }
 
 void
-doctor_exit(void)
+doctor_reporter_exit(void)
+{
+        reporter_exit(&doctor->reporter);
+        wasm_state_exit(&doctor->state);
+}
+
+void
+doctor_exit(bool exit_reporter)
 {
         mem_addr_validator_exit(&doctor->mem_validator);
         heap_use_validator_exit(&doctor->heap_validator);
         local_validator_exit(&doctor->local_validator);
-        reporter_exit(&doctor->reporter);
-        wasm_state_exit(&doctor->state);
+
+        if (exit_reporter) {
+                doctor_reporter_exit();
+        }
 }

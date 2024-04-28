@@ -24,7 +24,7 @@ test_correct_memory_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] correct memory use test\n");
 }
@@ -66,7 +66,7 @@ test_incorrect_memory_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit();
+        doctor_exit(true);
 
         printf("[OK] incorrect memory use test\n");
 }
