@@ -16,8 +16,8 @@
 void
 report(struct error_reporter *reporter)
 {
-        printf("\n==================== Wasm Doctor Report "
-               "====================\n");
+        printf("============================= Wasm Doctor Report "
+               "=============================\n\n");
 
         for (uint32_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
                 printf("Undefined value of size %u bytes read from address "
@@ -31,7 +31,11 @@ report(struct error_reporter *reporter)
                         printf("%u", reporter->undefined_memory_use_errors[i].validity[j]);
                 }
 
-                printf("\n\n");
+                printf("\n");
+        }
+
+        if (reporter->undefined_memory_use_errors_size > 0) {
+                printf("\n");
         }
 
         for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
@@ -41,11 +45,19 @@ report(struct error_reporter *reporter)
                        reporter->undefined_local_use_errors[i].location.function_name);
         }
 
+        if (reporter->undefined_local_use_errors_size > 0) {
+                printf("\n");
+        }
+
         for (uint32_t i = 0; i < reporter->use_after_free_errors_size; ++i) {
                 printf("Use after free of size %u bytes detected at address "
                        "%u. (%s)\n",
                        reporter->use_after_free_errors[i].size, reporter->use_after_free_errors[i].address,
                        reporter->use_after_free_errors[i].location.function_name);
+        }
+
+        if (reporter->use_after_free_errors_size > 0) {
+                printf("\n");
         }
 
         for (uint32_t i = 0; i < reporter->memory_leak_errors_size; ++i) {
@@ -55,9 +67,17 @@ report(struct error_reporter *reporter)
                        reporter->memory_leak_errors[i].location.function_name);
         }
 
+        if (reporter->memory_leak_errors_size > 0) {
+                printf("\n");
+        }
+
         for (uint32_t i = 0; i < reporter->double_free_errors_size; ++i) {
                 printf("Double free detected at address %u. (%s)\n", reporter->double_free_errors[i].address,
                        reporter->double_free_errors[i].location.function_name);
+        }
+
+        if (reporter->double_free_errors_size > 0) {
+                printf("\n");
         }
 
         for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
@@ -65,7 +85,11 @@ report(struct error_reporter *reporter)
                        reporter->invalid_free_errors[i].location.function_name);
         }
 
-        printf("============================================================"
+        if (reporter->invalid_free_errors_size > 0) {
+                printf("\n");
+        }
+
+        printf("============================================================================"
                "\n");
 }
 
