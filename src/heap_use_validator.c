@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "error_reporter.h"
 #include "heap_use_validator.h"
@@ -8,10 +9,20 @@ void
 register_malloc(struct heap_use_validator *validator, wasmptr_t block_start, uint32_t size_in_bytes)
 {
         validator->blocks = (struct allocated_block *)realloc(validator->blocks,
-                                                              sizeof(*validator->blocks) * ++validator->blocks_size);
+                                                              ++validator->blocks_size * sizeof(*validator->blocks));
         validator->blocks[validator->blocks_size - 1].block_start = block_start;
         validator->blocks[validator->blocks_size - 1].size_in_bytes = size_in_bytes;
         validator->blocks[validator->blocks_size - 1].freed = false;
+        validator->blocks[validator->blocks_size - 1].allocated_in_function_name = (char *)malloc(
+                strnlen(validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1],
+                        50) +
+                1); // TODO: 50
+
+        strncpy(validator->blocks[validator->blocks_size - 1].allocated_in_function_name,
+                validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1],
+                strnlen(validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1],
+                        50) +
+                        1); // TODO: 50
 }
 
 void
@@ -49,7 +60,7 @@ check_use_after_free(struct heap_use_validator *validator, wasmptr_t address,
                     address <= validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
                         found_on_heap = true;
 
-                        if (validator->blocks[i].freed == true) {
+                        if (validator->blocks[i].freed == false) {
                                 found_allocated = true;
                         }
                 }
@@ -76,11 +87,13 @@ heap_use_validator_exit(struct heap_use_validator *validator)
 {
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].freed == false) {
+
                         add_memory_leak(validator->reporter, validator->blocks[i].block_start,
                                         validator->blocks[i].size_in_bytes,
-                                        validator->reporter->state
-                                                ->function_names[validator->reporter->state->function_names_size - 1]);
+                                        validator->blocks[i].allocated_in_function_name);
                 }
+
+                free(validator->blocks[i].allocated_in_function_name);
         }
 
         free(validator->blocks);

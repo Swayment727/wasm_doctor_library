@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 
 #include "wasm_doctor.h"
 #include "wasm_types.h"
@@ -24,6 +25,8 @@ test_correct_memory_use(void)
         doctor_frame_exit();
 
         doctor_exit();
+
+        printf("[OK] correct memory use test\n");
 }
 
 void
@@ -64,6 +67,8 @@ test_incorrect_memory_use(void)
         doctor_frame_exit();
 
         doctor_exit();
+
+        printf("[OK] incorrect memory use test\n");
 }
 
 void

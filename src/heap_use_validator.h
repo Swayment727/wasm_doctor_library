@@ -17,6 +17,7 @@ struct allocated_block {
         wasmptr_t block_start;
         uint32_t size_in_bytes;
         bool freed;
+        char *allocated_in_function_name;
 };
 
 void register_malloc(struct heap_use_validator *validator, wasmptr_t block_start, uint32_t size_in_bytes);

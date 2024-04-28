@@ -47,6 +47,7 @@ move_shadow_stack_pointer(wasmptr_t address)
 void
 doctor_store(wasmptr_t address, uint32_t bit_size)
 {
+        set_bit_size(doctor->reporter.state, bit_size);
         validate_region(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
         check_use_after_free(&doctor->heap_validator, address * 8, bit_size);
 }
@@ -60,6 +61,7 @@ doctor_load(wasmptr_t address, uint32_t bit_size)
 {
         set_bit_size(doctor->reporter.state, bit_size);
         check_region_access(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
+        check_use_after_free(&doctor->heap_validator, address * 8, bit_size);
 }
 
 void
