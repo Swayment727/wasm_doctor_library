@@ -53,6 +53,7 @@ void
 doctor_store(wasmptr_t address, uint32_t bit_size)
 {
         validate_region(&mem_validator, address * 8, address * 8 + bit_size - 1);
+        check_use_after_free(&heap_validator, address * 8, bit_size);
 }
 
 /**

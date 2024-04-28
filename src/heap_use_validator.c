@@ -38,6 +38,31 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
 }
 
 void
+check_use_after_free(struct heap_use_validator *validator, wasmptr_t address,
+                     uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
+{
+        bool found_on_heap = false;
+        bool found_allocated = false;
+
+        for (uint32_t i = 0; i < validator->blocks_size; ++i) {
+                if (validator->blocks[i].block_start * 8 <= address + bit_size &&
+                    address <= validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
+                        found_on_heap = true;
+
+                        if (validator->blocks[i].freed == true) {
+                                found_allocated = true;
+                        }
+                }
+        }
+
+        if (found_on_heap && !found_allocated) {
+                add_use_after_free(validator->reporter, address, bit_size,
+                                   validator->reporter->state
+                                           ->function_names[validator->reporter->state->function_names_size - 1]);
+        }
+}
+
+void
 heap_use_validator_init(struct heap_use_validator *validator, struct error_reporter *reporter)
 {
         validator->reporter = reporter;
