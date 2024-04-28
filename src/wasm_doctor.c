@@ -22,7 +22,7 @@ struct wasm_doctor *doctor;
 wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
 /**
- * @brief Move the shadow stack pointer to its new position. If the stack size
+ * Move the shadow stack pointer to its new position. If the stack size
  * decreases invalidate values in the region that is no longer part of the
  * shadow stack. This function is Clang/LLVM shadow stack pointer specific.
  * It is meant to be used with the $__stack_pointer global in WebAssembly.

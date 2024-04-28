@@ -13,7 +13,7 @@ BUILD_DIR_TEST = build/test
 MKDIR = mkdir -p
 
 .PHONY: all
-all: compile test
+all: compile test doc
 
 .PHONY: compile
 compile: $(BUILD_DIR)/$(TARGET).a
@@ -39,5 +39,9 @@ $(BUILD_DIR_TEST)/%.o: $(SOURCE_DIR_TEST)/%.c
 	$(MKDIR) $(BUILD_DIR_TEST)
 	$(CC) $(CFLAGS) -o $@ -c $< -I$(SOURCE_DIR)
 
+.PHONY: doc
+doc: Doxyfile $(HEADERS)
+	doxygen Doxyfile
+
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) doc 2>/dev/null

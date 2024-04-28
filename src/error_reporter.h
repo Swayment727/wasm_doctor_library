@@ -7,6 +7,9 @@
 #include "wasm_state.h"
 #include "wasm_types.h"
 
+/**
+ * Can potentially be extended in the future with line number through the use of DWARF information or with stack trace.
+ */
 struct error_location {
         char *function_name;
 };
