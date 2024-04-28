@@ -12,7 +12,7 @@
 
 #define WASM_PAGE_SIZE 65536
 
-struct wasm_doctor doctor;
+struct wasm_doctor *doctor;
 
 /**
  * Shadow stack pointer is initially set to the highest address. Because of
@@ -33,7 +33,7 @@ void
 move_shadow_stack_pointer(wasmptr_t address)
 {
         if (address > shadow_stack_pointer) {
-                invalidate_region(&doctor.mem_validator, shadow_stack_pointer * 8, address * 8);
+                invalidate_region(&doctor->mem_validator, shadow_stack_pointer * 8, address * 8);
                 printf("move ssp - invalidate region from %u to %u\n", shadow_stack_pointer, address);
         }
 
@@ -47,8 +47,8 @@ move_shadow_stack_pointer(wasmptr_t address)
 void
 doctor_store(wasmptr_t address, uint32_t bit_size)
 {
-        validate_region(&doctor.mem_validator, address * 8, address * 8 + bit_size - 1);
-        check_use_after_free(&doctor.heap_validator, address * 8, bit_size);
+        validate_region(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
+        check_use_after_free(&doctor->heap_validator, address * 8, bit_size);
 }
 
 /**
@@ -58,66 +58,67 @@ doctor_store(wasmptr_t address, uint32_t bit_size)
 void
 doctor_load(wasmptr_t address, uint32_t bit_size)
 {
-        set_bit_size(doctor.reporter.state, bit_size);
-        check_region_access(&doctor.mem_validator, address * 8, address * 8 + bit_size - 1);
+        set_bit_size(doctor->reporter.state, bit_size);
+        check_region_access(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
 }
 
 void
 doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes)
 {
-        register_malloc(&doctor.heap_validator, block_start, size_in_bytes);
+        register_malloc(&doctor->heap_validator, block_start, size_in_bytes);
 }
 
 void
 doctor_register_free(wasmptr_t block_start)
 {
-        register_free(&doctor.heap_validator, block_start);
+        register_free(&doctor->heap_validator, block_start);
 }
 
 void
 doctor_local_set(uint32_t idx)
 {
-        register_set(&doctor.local_validator, idx);
+        register_set(&doctor->local_validator, idx);
 }
 
 void
 doctor_local_get(uint32_t idx)
 {
-        validate_get(&doctor.local_validator, idx);
+        validate_get(&doctor->local_validator, idx);
 }
 
 void
 doctor_frame_enter(uint32_t locals_size, char *function_name)
 {
-        enter_function(doctor.reporter.state, function_name);
-        local_validator_frame_enter(&doctor.local_validator, locals_size);
+        enter_function(doctor->reporter.state, function_name);
+        local_validator_frame_enter(&doctor->local_validator, locals_size);
 }
 
 void
 doctor_frame_exit(void)
 {
-        exit_function(doctor.reporter.state);
-        local_validator_frame_exit(&doctor.local_validator);
+        exit_function(doctor->reporter.state);
+        local_validator_frame_exit(&doctor->local_validator);
 }
 
 /**
  * @param[in] size_in_pages Size of WebAssembly memory in pages.
  */
 void
-doctor_init(uint32_t size_in_pages)
+doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages)
 {
-        reporter_init(&doctor.reporter, &doctor.state);
-        mem_addr_validator_init(&doctor.mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &doctor.reporter);
-        heap_use_validator_init(&doctor.heap_validator, &doctor.reporter);
-        local_validator_init(&doctor.local_validator, &doctor.reporter);
+        doctor = wasm_doctor;
+        reporter_init(&doctor->reporter, &doctor->state);
+        mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &doctor->reporter);
+        heap_use_validator_init(&doctor->heap_validator, &doctor->reporter);
+        local_validator_init(&doctor->local_validator, &doctor->reporter);
 }
 
 void
 doctor_exit(void)
 {
-        mem_addr_validator_exit(&doctor.mem_validator);
-        heap_use_validator_exit(&doctor.heap_validator);
-        local_validator_exit(&doctor.local_validator);
-        report(&doctor.reporter);
-        reporter_exit(&doctor.reporter);
+        mem_addr_validator_exit(&doctor->mem_validator);
+        heap_use_validator_exit(&doctor->heap_validator);
+        local_validator_exit(&doctor->local_validator);
+        report(&doctor->reporter);
+        reporter_exit(&doctor->reporter);
 }
