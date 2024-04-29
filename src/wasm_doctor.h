@@ -8,6 +8,7 @@
 #include "heap_use_validator.h"
 #include "local_validator.h"
 #include "mem_addr_validator.h"
+#include "shadow_stack_validator.h"
 #include "wasm_state.h"
 #include "wasm_types.h"
 
@@ -15,12 +16,13 @@ struct wasm_doctor {
         struct error_reporter reporter;
         struct wasm_state state;
 
+        struct shadow_stack_validator shadow_stack_validator;
         struct mem_addr_validator mem_validator;
         struct heap_use_validator heap_validator;
         struct local_validator local_validator;
 };
 
-void move_shadow_stack_pointer(wasmptr_t address);
+void doctor_move_shadow_stack_pointer(wasmptr_t address);
 void doctor_store(wasmptr_t address, uint32_t bit_size);
 void doctor_load(wasmptr_t address, uint32_t bit_size);
 void doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes);

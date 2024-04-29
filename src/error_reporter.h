@@ -49,6 +49,18 @@ struct invalid_free {
         struct error_location location;
 };
 
+struct invalid_read {
+        wasmptr_t address;
+        uint32_t size;
+        struct error_location location;
+};
+
+struct invalid_write {
+        wasmptr_t address;
+        uint32_t size;
+        struct error_location location;
+};
+
 struct error_reporter {
         struct wasm_state *state;
 
@@ -69,6 +81,12 @@ struct error_reporter {
 
         uint32_t invalid_free_errors_size;
         struct invalid_free *invalid_free_errors;
+
+        uint32_t invalid_read_errors_size;
+        struct invalid_read *invalid_read_errors;
+
+        uint32_t invalid_write_errors_size;
+        struct invalid_write *invalid_write_errors;
 };
 
 void report(struct error_reporter *reporter);
@@ -79,6 +97,8 @@ void add_use_after_free(struct error_reporter *reporter, uint32_t address, uint3
 void add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_double_free(struct error_reporter *reporter, uint32_t address, char *function_name);
 void add_invalid_free(struct error_reporter *reporter, uint32_t address, char *function_name);
+void add_invalid_read(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
+void add_invalid_write(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void reporter_init(struct error_reporter *reporter, struct wasm_state *state);
 void reporter_exit(struct error_reporter *reporter);
 

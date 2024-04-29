@@ -5,12 +5,12 @@
 #include <stdint.h>
 
 #include "error_reporter.h"
+#include "shadow_stack_validator.h"
 #include "wasm_types.h"
 
-struct heap_use_validator {
-        struct error_reporter *reporter;
-        uint32_t blocks_size;
-        struct allocated_block *blocks;
+struct global_block {
+        wasmptr_t block_start;
+        uint32_t size_in_bytes;
 };
 
 struct allocated_block {
@@ -20,10 +20,23 @@ struct allocated_block {
         char *allocated_in_function_name;
 };
 
+struct heap_use_validator {
+        struct error_reporter *reporter;
+        uint32_t global_blocks_size;
+        struct shadow_stack_validator *shadow_stack_validator;
+        struct global_block *global_blocks;
+        uint32_t blocks_size;
+        struct allocated_block *blocks;
+};
+
+void register_global_data(struct heap_use_validator *validator, wasmptr_t address, uint32_t size_in_bytes);
 void register_malloc(struct heap_use_validator *validator, wasmptr_t block_start, uint32_t size_in_bytes);
 void register_free(struct heap_use_validator *validator, wasmptr_t block_start);
 void check_use_after_free(struct heap_use_validator *validator, wasmptr_t address, uint32_t bit_size);
-void heap_use_validator_init(struct heap_use_validator *validator, struct error_reporter *reporter);
+void check_read_validity(struct heap_use_validator *validator, wasmptr_t address, uint32_t bit_size);
+void check_write_validity(struct heap_use_validator *validator, wasmptr_t address, uint32_t bit_size);
+void heap_use_validator_init(struct heap_use_validator *validator,
+                             struct shadow_stack_validator *shadow_stack_validator, struct error_reporter *reporter);
 void heap_use_validator_exit(struct heap_use_validator *validator);
 
 #endif /* HEAP_USE_VALIDATOR */

@@ -1,11 +1,11 @@
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "error_reporter.h"
 #include "heap_use_validator.h"
 #include "local_validator.h"
 #include "mem_addr_validator.h"
+#include "shadow_stack_validator.h"
 #include "wasm_doctor.h"
 #include "wasm_state.h"
 #include "wasm_types.h"
@@ -13,13 +13,6 @@
 #define WASM_PAGE_SIZE 65536
 
 struct wasm_doctor *doctor;
-
-/**
- * Shadow stack pointer is initially set to the highest address. Because of
- * this the first call of move_shadow_stack_pointer function sets it to the
- * actual start of the shadow stack.
- */
-wasmptr_t shadow_stack_pointer = UINT32_MAX;
 
 /**
  * Move the shadow stack pointer to its new position. If the stack size
@@ -30,14 +23,19 @@ wasmptr_t shadow_stack_pointer = UINT32_MAX;
  * @param[in] address New address of the shadow stack pointer.
  */
 void
-move_shadow_stack_pointer(wasmptr_t address)
+doctor_move_shadow_stack_pointer(wasmptr_t address)
 {
-        if (address > shadow_stack_pointer) {
-                invalidate_region(&doctor->mem_validator, shadow_stack_pointer * 8, address * 8);
-                printf("move ssp - invalidate region from %u to %u\n", shadow_stack_pointer, address);
-        }
+        move_shadow_stack_pointer(&doctor->shadow_stack_validator, &doctor->mem_validator, address);
+}
 
-        shadow_stack_pointer = address;
+/**
+ * @param[in] address Address of the global data to be validated.
+ * @param[in] bit_size Size of the global data to be validated in bits.
+ */
+void
+doctor_global_data_validate(wasmptr_t address, uint32_t bit_size)
+{
+        validate_region(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
 }
 
 /**
@@ -50,6 +48,7 @@ doctor_store(wasmptr_t address, uint32_t bit_size)
         set_bit_size(doctor->reporter.state, bit_size);
         validate_region(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
         check_use_after_free(&doctor->heap_validator, address * 8, bit_size);
+        check_write_validity(&doctor->heap_validator, address * 8, bit_size);
 }
 
 /**
@@ -62,6 +61,7 @@ doctor_load(wasmptr_t address, uint32_t bit_size)
         set_bit_size(doctor->reporter.state, bit_size);
         check_region_access(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
         check_use_after_free(&doctor->heap_validator, address * 8, bit_size);
+        check_read_validity(&doctor->heap_validator, address * 8, bit_size);
 }
 
 /**
@@ -130,8 +130,9 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages)
         wasm_state_init(&doctor->state);
         reporter_init(&doctor->reporter, &doctor->state);
         local_validator_init(&doctor->local_validator, &doctor->reporter);
-        heap_use_validator_init(&doctor->heap_validator, &doctor->reporter);
+        heap_use_validator_init(&doctor->heap_validator, &doctor->shadow_stack_validator, &doctor->reporter);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &doctor->reporter);
+        shadow_stack_validator_init(&doctor->shadow_stack_validator);
 }
 
 /**

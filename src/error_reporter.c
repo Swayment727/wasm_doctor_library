@@ -89,6 +89,26 @@ report(struct error_reporter *reporter)
                 printf("\n");
         }
 
+        for (uint32_t i = 0; i < reporter->invalid_read_errors_size; ++i) {
+                printf("Invalid read of size %u bits detected at address %u. (%s)\n",
+                       reporter->invalid_read_errors[i].size, reporter->invalid_read_errors[i].address,
+                       reporter->invalid_read_errors[i].location.function_name);
+        }
+
+        if (reporter->invalid_read_errors_size > 0) {
+                printf("\n");
+        }
+
+        for (uint32_t i = 0; i < reporter->invalid_write_errors_size; ++i) {
+                printf("Invalid write of size %u bits detected at address %u. (%s)\n",
+                       reporter->invalid_write_errors[i].size, reporter->invalid_write_errors[i].address,
+                       reporter->invalid_write_errors[i].location.function_name);
+        }
+
+        if (reporter->invalid_write_errors_size > 0) {
+                printf("\n");
+        }
+
         printf("============================================================================"
                "\n");
 }
@@ -172,6 +192,32 @@ add_invalid_free(struct error_reporter *reporter, uint32_t address, char *functi
 }
 
 void
+add_invalid_read(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name)
+{
+        struct invalid_read **errors = &reporter->invalid_read_errors;
+        uint32_t *errors_size = &reporter->invalid_read_errors_size;
+
+        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        (*errors)[*errors_size - 1].address = address;
+        (*errors)[*errors_size - 1].size = size;
+
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
+}
+
+void
+add_invalid_write(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name)
+{
+        struct invalid_write **errors = &reporter->invalid_write_errors;
+        uint32_t *errors_size = &reporter->invalid_write_errors_size;
+
+        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        (*errors)[*errors_size - 1].address = address;
+        (*errors)[*errors_size - 1].size = size;
+
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
+}
+
+void
 reporter_init(struct error_reporter *reporter, struct wasm_state *state)
 {
         reporter->undefined_memory_use_errors_size = 0;
@@ -191,6 +237,12 @@ reporter_init(struct error_reporter *reporter, struct wasm_state *state)
 
         reporter->invalid_free_errors_size = 0;
         reporter->invalid_free_errors = NULL;
+
+        reporter->invalid_read_errors_size = 0;
+        reporter->invalid_read_errors = NULL;
+
+        reporter->invalid_write_errors_size = 0;
+        reporter->invalid_write_errors = NULL;
 
         reporter->state = state;
 }
@@ -223,10 +275,20 @@ reporter_exit(struct error_reporter *reporter)
                 free(reporter->invalid_free_errors[i].location.function_name);
         }
 
+        for (uint32_t i = 0; i < reporter->invalid_read_errors_size; ++i) {
+                free(reporter->invalid_read_errors[i].location.function_name);
+        }
+
+        for (uint32_t i = 0; i < reporter->invalid_write_errors_size; ++i) {
+                free(reporter->invalid_write_errors[i].location.function_name);
+        }
+
         free(reporter->undefined_memory_use_errors);
         free(reporter->undefined_local_use_errors);
         free(reporter->use_after_free_errors);
         free(reporter->memory_leak_errors);
         free(reporter->double_free_errors);
         free(reporter->invalid_free_errors);
+        free(reporter->invalid_read_errors);
+        free(reporter->invalid_write_errors);
 }
