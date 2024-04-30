@@ -5,6 +5,7 @@
 
 #include "error_reporter.h"
 #include "wasm_state.h"
+#include "wasm_types.h"
 
 #define SET_FUNCTION_NAME(errors, errors_size, function_name)                                                          \
         {                                                                                                              \
@@ -20,7 +21,7 @@ report(struct error_reporter *reporter)
                "=============================\n\n");
 
         for (uint32_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
-                printf("Undefined value of size %u bytes read from address "
+                printf("Undefined value of size %u bits read from address "
                        "%u. "
                        "(%s)\n",
                        reporter->undefined_memory_use_errors[i].size, reporter->undefined_memory_use_errors[i].address,
@@ -52,7 +53,7 @@ report(struct error_reporter *reporter)
         for (uint32_t i = 0; i < reporter->use_after_free_errors_size; ++i) {
                 printf("Use after free of size %u bytes detected at address "
                        "%u. (%s)\n",
-                       reporter->use_after_free_errors[i].size, reporter->use_after_free_errors[i].address,
+                       reporter->use_after_free_errors[i].size, reporter->use_after_free_errors[i].address * 8,
                        reporter->use_after_free_errors[i].location.function_name);
         }
 
@@ -63,7 +64,7 @@ report(struct error_reporter *reporter)
         for (uint32_t i = 0; i < reporter->memory_leak_errors_size; ++i) {
                 printf("Memory leak of size %u bytes detected at address "
                        "%u. (%s)\n",
-                       reporter->memory_leak_errors[i].size, reporter->memory_leak_errors[i].address,
+                       reporter->memory_leak_errors[i].size, reporter->memory_leak_errors[i].address * 8,
                        reporter->memory_leak_errors[i].location.function_name);
         }
 
@@ -72,7 +73,7 @@ report(struct error_reporter *reporter)
         }
 
         for (uint32_t i = 0; i < reporter->double_free_errors_size; ++i) {
-                printf("Double free detected at address %u. (%s)\n", reporter->double_free_errors[i].address,
+                printf("Double free detected at address %u. (%s)\n", reporter->double_free_errors[i].address * 8,
                        reporter->double_free_errors[i].location.function_name);
         }
 
@@ -81,7 +82,7 @@ report(struct error_reporter *reporter)
         }
 
         for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
-                printf("Invalid free detected at address %u. (%s)\n", reporter->invalid_free_errors[i].address,
+                printf("Invalid free detected at address %u. (%s)\n", reporter->invalid_free_errors[i].address * 8,
                        reporter->invalid_free_errors[i].location.function_name);
         }
 
@@ -114,7 +115,7 @@ report(struct error_reporter *reporter)
 }
 
 void
-add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, bool *validity,
+add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, uint32_t size, bool *validity,
                          char *function_name)
 {
         struct undefined_memory_use **errors = &reporter->undefined_memory_use_errors;
@@ -192,7 +193,7 @@ add_invalid_free(struct error_reporter *reporter, uint32_t address, char *functi
 }
 
 void
-add_invalid_read(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name)
+add_invalid_read(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name)
 {
         struct invalid_read **errors = &reporter->invalid_read_errors;
         uint32_t *errors_size = &reporter->invalid_read_errors_size;
@@ -205,7 +206,7 @@ add_invalid_read(struct error_reporter *reporter, uint32_t address, uint32_t siz
 }
 
 void
-add_invalid_write(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name)
+add_invalid_write(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name)
 {
         struct invalid_write **errors = &reporter->invalid_write_errors;
         uint32_t *errors_size = &reporter->invalid_write_errors_size;

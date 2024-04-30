@@ -58,7 +58,7 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
 }
 
 void
-check_use_after_free(struct heap_use_validator *validator, wasmptr_t address,
+check_use_after_free(struct heap_use_validator *validator, doctorptr_t address,
                      uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
 {
         bool found_on_heap = false;
@@ -83,7 +83,7 @@ check_use_after_free(struct heap_use_validator *validator, wasmptr_t address,
 }
 
 static bool
-is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uint32_t bit_size)
+is_read_write_valid(struct heap_use_validator *validator, doctorptr_t address, uint32_t bit_size)
 {
         if (validator->shadow_stack_validator->shadow_stack_pointer * 8 <= address &&
             address + bit_size <= validator->shadow_stack_validator->shadow_stack_pointer_base * 8) {
@@ -109,7 +109,7 @@ is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uin
 }
 
 void
-check_read_validity(struct heap_use_validator *validator, wasmptr_t address,
+check_read_validity(struct heap_use_validator *validator, doctorptr_t address,
                     uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
 {
         if (!is_read_write_valid(validator, address, bit_size)) {
@@ -120,7 +120,7 @@ check_read_validity(struct heap_use_validator *validator, wasmptr_t address,
 }
 
 void
-check_write_validity(struct heap_use_validator *validator, wasmptr_t address,
+check_write_validity(struct heap_use_validator *validator, doctorptr_t address,
                      uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
 {
         if (!is_read_write_valid(validator, address, bit_size)) {

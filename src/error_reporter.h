@@ -90,15 +90,15 @@ struct error_reporter {
 };
 
 void report(struct error_reporter *reporter);
-void add_undefined_memory_use(struct error_reporter *reporter, uint32_t address, uint32_t size, bool *validity,
+void add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, uint32_t size, bool *validity,
                               char *function_name);
 void add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *function_name);
 void add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
 void add_double_free(struct error_reporter *reporter, uint32_t address, char *function_name);
 void add_invalid_free(struct error_reporter *reporter, uint32_t address, char *function_name);
-void add_invalid_read(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
-void add_invalid_write(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
+void add_invalid_read(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name);
+void add_invalid_write(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name);
 void reporter_init(struct error_reporter *reporter, struct wasm_state *state);
 void reporter_exit(struct error_reporter *reporter);
 
