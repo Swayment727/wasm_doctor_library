@@ -137,7 +137,113 @@ test_invalid_read_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] no invalid read shadow stack test\n");
+        printf("[OK] invalid read shadow stack test\n");
+}
+
+void
+test_invalid_read_bounds_shadow_stack(void)
+{
+        struct wasm_doctor doctor;
+        doctor_init(&doctor, 2);
+
+        doctor_frame_enter(10, "test_function");
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        wasmptr_t address = 64;
+        uint32_t bit_size = 32;
+
+        doctor_move_shadow_stack_pointer(address / 8);
+        doctor_move_shadow_stack_pointer(address / 8 - 4);
+
+        doctor_load(address / 8 - 4, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        doctor_load(address / 8 - 4, bit_size + 1);
+
+        assert(doctor.reporter.invalid_read_errors_size == 1);
+
+        doctor_load(address / 8 - 3, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 2);
+
+        doctor_frame_exit();
+
+        doctor_exit(false);
+        doctor_reporter_exit();
+
+        printf("[OK] invalid read bounds shadow stack test\n");
+}
+
+void
+test_invalid_read_bounds_global_data(void)
+{
+        struct wasm_doctor doctor;
+        doctor_init(&doctor, 2);
+
+        doctor_frame_enter(10, "test_function");
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        wasmptr_t address = 64;
+        uint32_t bit_size = 32;
+
+        doctor_global_data_validate(address / 8 - 4, bit_size);
+
+        doctor_load(address / 8 - 4, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        doctor_load(address / 8 - 4, bit_size + 1);
+
+        assert(doctor.reporter.invalid_read_errors_size == 1);
+
+        doctor_load(address / 8 - 3, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 2);
+
+        doctor_frame_exit();
+
+        doctor_exit(false);
+        doctor_reporter_exit();
+
+        printf("[OK] invalid read bounds global data test\n");
+}
+
+void
+test_invalid_read_bounds_malloc(void)
+{
+        struct wasm_doctor doctor;
+        doctor_init(&doctor, 2);
+
+        doctor_frame_enter(10, "test_function");
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        wasmptr_t address = 64;
+        uint32_t bit_size = 32;
+
+        doctor_register_malloc(address / 8 - 4, bit_size / 8);
+
+        doctor_load(address / 8 - 4, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        doctor_load(address / 8 - 4, bit_size + 1);
+
+        assert(doctor.reporter.invalid_read_errors_size == 1);
+
+        doctor_load(address / 8 - 3, bit_size);
+
+        assert(doctor.reporter.invalid_read_errors_size == 2);
+
+        doctor_frame_exit();
+
+        doctor_exit(false);
+        doctor_reporter_exit();
+
+        printf("[OK] invalid read bounds malloc test\n");
 }
 
 void
@@ -147,4 +253,7 @@ run_invalid_read_test(void)
         test_invalid_read();
         test_no_invalid_read_shadow_stack();
         test_invalid_read_shadow_stack();
+        test_invalid_read_bounds_shadow_stack();
+        test_invalid_read_bounds_global_data();
+        test_invalid_read_bounds_malloc();
 }

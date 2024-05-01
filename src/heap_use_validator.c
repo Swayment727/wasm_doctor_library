@@ -66,7 +66,7 @@ check_use_after_free(struct heap_use_validator *validator, doctorptr_t address,
 
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].block_start * 8 <= address + bit_size &&
-                    address <= validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
+                    address < validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
                         found_on_heap = true;
 
                         if (validator->blocks[i].freed == false) {
@@ -91,16 +91,17 @@ is_read_write_valid(struct heap_use_validator *validator, doctorptr_t address, u
         }
 
         for (uint32_t i = 0; i < validator->global_blocks_size; ++i) {
-                if (validator->global_blocks[i].block_start * 8 <= address + bit_size &&
-                    address <= validator->global_blocks[i].block_start * 8 +
-                                       validator->global_blocks[i].size_in_bytes * 8) {
+                if (validator->global_blocks[i].block_start * 8 <= address &&
+                    address + bit_size <= validator->global_blocks[i].block_start * 8 +
+                                                  validator->global_blocks[i].size_in_bytes * 8) {
                         return true;
                 }
         }
 
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {
-                if (validator->blocks[i].block_start * 8 <= address + bit_size &&
-                    address <= validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
+                if (validator->blocks[i].block_start * 8 <= address &&
+                    address + bit_size <=
+                            validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
                         return true;
                 }
         }
