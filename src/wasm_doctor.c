@@ -36,6 +36,7 @@ void
 doctor_global_data_validate(wasmptr_t address, uint32_t bit_size)
 {
         validate_region(&doctor->mem_validator, address * 8, address * 8 + bit_size - 1);
+        register_global_data(&doctor->heap_validator, address, bit_size / 8);
 }
 
 /**
@@ -169,6 +170,7 @@ doctor_exit(bool exit_reporter)
         local_validator_exit(&doctor->local_validator);
 
         if (exit_reporter) {
+                report(&doctor->reporter);
                 doctor_reporter_exit();
         }
 }
