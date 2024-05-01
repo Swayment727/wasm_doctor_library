@@ -50,6 +50,17 @@ report(struct error_reporter *reporter)
         printf("============================= Wasm Doctor Report "
                "=============================\n\n");
 
+        for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
+                printf("Undefined local with index %u read. "
+                       "(%s)\n",
+                       reporter->undefined_local_use_errors[i].idx,
+                       reporter->undefined_local_use_errors[i].location.function_name);
+        }
+
+        if (reporter->undefined_local_use_errors_size > 0) {
+                printf("\n");
+        }
+
         for (uint32_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
                 char *function_name = reporter->undefined_memory_use_errors[i].location.function_name;
 
@@ -71,57 +82,6 @@ report(struct error_reporter *reporter)
         }
 
         if (reporter->undefined_memory_use_errors_size > 0) {
-                printf("\n");
-        }
-
-        for (uint32_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
-                printf("Undefined local with index %u read. "
-                       "(%s)\n",
-                       reporter->undefined_local_use_errors[i].idx,
-                       reporter->undefined_local_use_errors[i].location.function_name);
-        }
-
-        if (reporter->undefined_local_use_errors_size > 0) {
-                printf("\n");
-        }
-
-        for (uint32_t i = 0; i < reporter->use_after_free_errors_size; ++i) {
-                printf("Use after free of size %u bytes detected at address "
-                       "%u. (%s)\n",
-                       reporter->use_after_free_errors[i].size, reporter->use_after_free_errors[i].address * 8,
-                       reporter->use_after_free_errors[i].location.function_name);
-        }
-
-        if (reporter->use_after_free_errors_size > 0) {
-                printf("\n");
-        }
-
-        for (uint32_t i = 0; i < reporter->memory_leak_errors_size; ++i) {
-                printf("Memory leak of size %u bytes detected at address "
-                       "%u. (%s)\n",
-                       reporter->memory_leak_errors[i].size, reporter->memory_leak_errors[i].address * 8,
-                       reporter->memory_leak_errors[i].location.function_name);
-        }
-
-        if (reporter->memory_leak_errors_size > 0) {
-                printf("\n");
-        }
-
-        for (uint32_t i = 0; i < reporter->double_free_errors_size; ++i) {
-                printf("Double free detected at address %u. (%s)\n", reporter->double_free_errors[i].address * 8,
-                       reporter->double_free_errors[i].location.function_name);
-        }
-
-        if (reporter->double_free_errors_size > 0) {
-                printf("\n");
-        }
-
-        for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
-                printf("Invalid free detected at address %u. (%s)\n", reporter->invalid_free_errors[i].address * 8,
-                       reporter->invalid_free_errors[i].location.function_name);
-        }
-
-        if (reporter->invalid_free_errors_size > 0) {
                 printf("\n");
         }
 
@@ -150,6 +110,46 @@ report(struct error_reporter *reporter)
         }
 
         if (reporter->invalid_write_errors_size > 0) {
+                printf("\n");
+        }
+
+        for (uint32_t i = 0; i < reporter->use_after_free_errors_size; ++i) {
+                printf("Use after free of size %u bytes detected at address "
+                       "%u. (%s)\n",
+                       reporter->use_after_free_errors[i].size, reporter->use_after_free_errors[i].address * 8,
+                       reporter->use_after_free_errors[i].location.function_name);
+        }
+
+        if (reporter->use_after_free_errors_size > 0) {
+                printf("\n");
+        }
+
+        for (uint32_t i = 0; i < reporter->double_free_errors_size; ++i) {
+                printf("Double free detected at address %u. (%s)\n", reporter->double_free_errors[i].address * 8,
+                       reporter->double_free_errors[i].location.function_name);
+        }
+
+        if (reporter->double_free_errors_size > 0) {
+                printf("\n");
+        }
+
+        for (uint32_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
+                printf("Invalid free detected at address %u. (%s)\n", reporter->invalid_free_errors[i].address * 8,
+                       reporter->invalid_free_errors[i].location.function_name);
+        }
+
+        if (reporter->invalid_free_errors_size > 0) {
+                printf("\n");
+        }
+
+        for (uint32_t i = 0; i < reporter->memory_leak_errors_size; ++i) {
+                printf("Memory leak of size %u bytes detected at address "
+                       "%u. (%s)\n",
+                       reporter->memory_leak_errors[i].size, reporter->memory_leak_errors[i].address * 8,
+                       reporter->memory_leak_errors[i].location.function_name);
+        }
+
+        if (reporter->memory_leak_errors_size > 0) {
                 printf("\n");
         }
 
