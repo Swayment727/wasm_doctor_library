@@ -14,6 +14,36 @@
                         strnlen(function_name, 50) + 1);                                                               \
         }
 
+static bool
+is_dlmalloc(char *function_name)
+{
+        if (!strcmp(function_name, "dlmalloc")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_start(char *function_name)
+{
+        if (!strcmp(function_name, "_start")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_stdio_exit(char *function_name)
+{
+        if (!strcmp(function_name, "__stdio_exit")) {
+                return true;
+        }
+
+        return false;
+}
+
 void
 report(struct error_reporter *reporter)
 {
@@ -21,18 +51,23 @@ report(struct error_reporter *reporter)
                "=============================\n\n");
 
         for (uint32_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
-                printf("Undefined value of size %u bits read from address "
-                       "%u. "
-                       "(%s)\n",
-                       reporter->undefined_memory_use_errors[i].size, reporter->undefined_memory_use_errors[i].address,
-                       reporter->undefined_memory_use_errors[i].location.function_name);
+                char *function_name = reporter->undefined_memory_use_errors[i].location.function_name;
 
-                printf("validity: ");
-                for (uint32_t j = 0; j < reporter->undefined_memory_use_errors[i].size; ++j) {
-                        printf("%u", reporter->undefined_memory_use_errors[i].validity[j]);
+                if (!is_dlmalloc(function_name) && !is_start(function_name) && !is_stdio_exit(function_name)) {
+                        printf("Undefined value of size %u bits read from address "
+                               "%u. "
+                               "(%s)\n",
+                               reporter->undefined_memory_use_errors[i].size,
+                               reporter->undefined_memory_use_errors[i].address,
+                               reporter->undefined_memory_use_errors[i].location.function_name);
+
+                        printf("validity: ");
+                        for (uint32_t j = 0; j < reporter->undefined_memory_use_errors[i].size; ++j) {
+                                printf("%u", reporter->undefined_memory_use_errors[i].validity[j]);
+                        }
+
+                        printf("\n");
                 }
-
-                printf("\n");
         }
 
         if (reporter->undefined_memory_use_errors_size > 0) {
@@ -91,9 +126,13 @@ report(struct error_reporter *reporter)
         }
 
         for (uint32_t i = 0; i < reporter->invalid_read_errors_size; ++i) {
-                printf("Invalid read of size %u bits detected at address %u. (%s)\n",
-                       reporter->invalid_read_errors[i].size, reporter->invalid_read_errors[i].address,
-                       reporter->invalid_read_errors[i].location.function_name);
+                char *function_name = reporter->invalid_read_errors[i].location.function_name;
+
+                if (!is_dlmalloc(function_name) && !is_start(function_name) && !is_stdio_exit(function_name)) {
+                        printf("Invalid read of size %u bits detected at address %u. (%s)\n",
+                               reporter->invalid_read_errors[i].size, reporter->invalid_read_errors[i].address,
+                               reporter->invalid_read_errors[i].location.function_name);
+                }
         }
 
         if (reporter->invalid_read_errors_size > 0) {
@@ -101,9 +140,13 @@ report(struct error_reporter *reporter)
         }
 
         for (uint32_t i = 0; i < reporter->invalid_write_errors_size; ++i) {
-                printf("Invalid write of size %u bits detected at address %u. (%s)\n",
-                       reporter->invalid_write_errors[i].size, reporter->invalid_write_errors[i].address,
-                       reporter->invalid_write_errors[i].location.function_name);
+                char *function_name = reporter->invalid_write_errors[i].location.function_name;
+
+                if (!is_dlmalloc(function_name) && !is_start(function_name) && !is_stdio_exit(function_name)) {
+                        printf("Invalid write of size %u bits detected at address %u. (%s)\n",
+                               reporter->invalid_write_errors[i].size, reporter->invalid_write_errors[i].address,
+                               reporter->invalid_write_errors[i].location.function_name);
+                }
         }
 
         if (reporter->invalid_write_errors_size > 0) {
