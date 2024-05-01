@@ -25,7 +25,8 @@ test_no_invalid_write(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid write test\n");
 }
@@ -64,7 +65,8 @@ test_no_invalid_write_shadow_stack(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid write shadow stack test\n");
 }
@@ -97,7 +99,8 @@ test_invalid_write(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] invalid write test\n");
 }
@@ -134,7 +137,8 @@ test_invalid_write_shadow_stack(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid write shadow stack test\n");
 }

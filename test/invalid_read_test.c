@@ -26,7 +26,8 @@ test_no_invalid_read(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid read test\n");
 }
@@ -65,7 +66,8 @@ test_no_invalid_read_shadow_stack(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid read shadow stack test\n");
 }
@@ -94,7 +96,8 @@ test_invalid_read(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] invalid read test\n");
 }
@@ -131,7 +134,8 @@ test_invalid_read_shadow_stack(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid read shadow stack test\n");
 }

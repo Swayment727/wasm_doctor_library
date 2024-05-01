@@ -22,7 +22,8 @@ test_correct_local_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] correct local use test\n");
 }
@@ -73,7 +74,8 @@ test_incorrect_local_use(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] incorrect local use test\n");
 }

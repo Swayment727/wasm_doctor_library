@@ -23,7 +23,8 @@ test_no_invalid_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no invalid free test\n");
 }
@@ -51,7 +52,8 @@ test_invalid_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] invalid free test\n");
 }

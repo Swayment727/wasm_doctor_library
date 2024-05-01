@@ -23,7 +23,8 @@ test_no_double_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] no double free test\n");
 }
@@ -52,7 +53,8 @@ test_double_free(void)
 
         doctor_frame_exit();
 
-        doctor_exit(true);
+        doctor_exit(false);
+        doctor_reporter_exit();
 
         printf("[OK] double free test\n");
 }
