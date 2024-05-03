@@ -15,9 +15,22 @@
 struct wasm_doctor *doctor;
 
 /**
- * Move the shadow stack pointer to its new position. If the stack size
- * decreases invalidate values in the region that is no longer part of the
- * shadow stack. This function is Clang/LLVM shadow stack pointer specific.
+ * Set the shadow stack pointer base to position defined in WebAssembly module.
+ * This function is Clang/LLVM shadow stack pointer specific.
+ * It is meant to be used with the $__stack_pointer global in WebAssembly.
+ *
+ * @param[in] address Address of the shadow stack pointer base.
+ */
+void
+doctor_set_shadow_stack_pointer_base(wasmptr_t address)
+{
+        set_shadow_stack_pointer_base(&doctor->shadow_stack_validator, address);
+}
+
+/**
+ * Move the shadow stack pointer to its new position.
+ * If the stack size decreases invalidate values in the region that is no longer part of the shadow stack.
+ * This function is Clang/LLVM shadow stack pointer specific.
  * It is meant to be used with the $__stack_pointer global in WebAssembly.
  *
  * @param[in] address New address of the shadow stack pointer.
@@ -133,7 +146,6 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages)
         local_validator_init(&doctor->local_validator, &doctor->reporter);
         heap_use_validator_init(&doctor->heap_validator, &doctor->shadow_stack_validator, &doctor->reporter);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages * 8, &doctor->reporter);
-        shadow_stack_validator_init(&doctor->shadow_stack_validator);
 
         enter_function(doctor->reporter.state, "module");
 }

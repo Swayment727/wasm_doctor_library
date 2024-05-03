@@ -44,7 +44,7 @@ test_no_invalid_write_shadow_stack(void)
         wasmptr_t address = 64;
         uint32_t bit_size = 32;
 
-        doctor_move_shadow_stack_pointer(address / 8);
+        doctor_set_shadow_stack_pointer_base(address / 8);
         doctor_move_shadow_stack_pointer(address / 8 - 4);
 
         doctor_store(address / 8 - 4, bit_size);
@@ -118,7 +118,7 @@ test_invalid_write_shadow_stack(void)
         wasmptr_t address = 64;
         uint32_t bit_size = 32;
 
-        doctor_move_shadow_stack_pointer(address / 8);
+        doctor_set_shadow_stack_pointer_base(address / 8);
         doctor_move_shadow_stack_pointer(address / 8 - 4);
 
         doctor_store(address / 8 - 2, bit_size);
@@ -156,7 +156,7 @@ test_invalid_write_bounds_shadow_stack(void)
         wasmptr_t address = 64;
         uint32_t bit_size = 32;
 
-        doctor_move_shadow_stack_pointer(address / 8);
+        doctor_set_shadow_stack_pointer_base(address / 8);
         doctor_move_shadow_stack_pointer(address / 8 - 4);
 
         doctor_store(address / 8 - 4, bit_size);

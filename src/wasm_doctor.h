@@ -22,6 +22,7 @@ struct wasm_doctor {
         struct local_validator local_validator;
 };
 
+void doctor_set_shadow_stack_pointer_base(wasmptr_t address);
 void doctor_move_shadow_stack_pointer(wasmptr_t address);
 void doctor_global_data_validate(wasmptr_t address, uint32_t bit_size);
 void doctor_store(wasmptr_t address, uint32_t bit_size);
