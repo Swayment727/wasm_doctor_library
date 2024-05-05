@@ -1,17 +1,10 @@
-#include <stdint.h>
 #include <stdlib.h>
 
-void
-foo()
-{
-        uint32_t *ptr = malloc(42);
-        free(ptr);
-        free(ptr);
-}
-
 int
-main()
+main(void)
 {
-        foo();
+        int *x = (int *)malloc(42);
+        free(x);
+        free(x);
         return 0;
 }
