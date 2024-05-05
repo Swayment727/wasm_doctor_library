@@ -98,10 +98,12 @@ static void
 print_stack_trace(struct error_reporter *reporter)
 {
         if (reporter->state->function_names_size >= 1) {
+                printf("== Wasm Doctor == ");
                 for (uint32_t i = reporter->state->function_names_size - 1; i > 0; --i) {
                         printf("%s <- ", reporter->state->function_names[i]);
                 }
                 printf("%s\n", reporter->state->function_names[0]);
+                printf("== Wasm Doctor == \n");
         }
 }
 
@@ -243,11 +245,11 @@ add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, u
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name)) {
-                printf("Undefined value of size %u bits read from address "
+                printf("== Wasm Doctor == Undefined value of size %u bits read from address "
                        "%u.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
 
-                printf("validity: ");
+                printf("== Wasm Doctor == validity: ");
                 for (uint32_t j = 0; j < (*errors)[*errors_size - 1].size; ++j) {
                         printf("%u", (*errors)[*errors_size - 1].validity[j]);
                 }
@@ -269,7 +271,7 @@ add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *fun
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name) && false) { // TODO: ignore?
-                printf("Undefined local with index %u read.\n", (*errors)[*errors_size - 1].idx);
+                printf("== Wasm Doctor == Undefined local with index %u read.\n", (*errors)[*errors_size - 1].idx);
                 print_stack_trace(reporter);
         }
 }
@@ -287,7 +289,7 @@ add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t s
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name)) {
-                printf("Use after free of size %u bytes detected at address "
+                printf("== Wasm Doctor == Use after free of size %u bytes detected at address "
                        "%u.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
@@ -307,7 +309,7 @@ add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name)) {
-                printf("Memory leak of size %u bytes detected at address "
+                printf("== Wasm Doctor == Memory leak of size %u bytes detected at address "
                        "%u.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
@@ -326,7 +328,8 @@ add_double_free(struct error_reporter *reporter, uint32_t address, char *functio
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name)) {
-                printf("Double free detected at address %u.\n", (*errors)[*errors_size - 1].address * 8);
+                printf("== Wasm Doctor == Double free detected at address %u.\n",
+                       (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
         }
 }
@@ -343,7 +346,8 @@ add_invalid_free(struct error_reporter *reporter, uint32_t address, char *functi
         SET_FUNCTION_NAME(errors, errors_size, function_name);
 
         if (!is_blacklisted(function_name)) {
-                printf("Invalid free detected at address %u.\n", (*errors)[*errors_size - 1].address * 8);
+                printf("== Wasm Doctor == Invalid free detected at address %u.\n",
+                       (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
         }
 }
@@ -361,8 +365,8 @@ add_invalid_read(struct error_reporter *reporter, doctorptr_t address, uint32_t 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name)) {
-                printf("Invalid read of size %u bits detected at address %u.\n", (*errors)[*errors_size - 1].size,
-                       (*errors)[*errors_size - 1].address);
+                printf("== Wasm Doctor == Invalid read of size %u bits detected at address %u.\n",
+                       (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
         }
 }
@@ -380,8 +384,8 @@ add_invalid_write(struct error_reporter *reporter, doctorptr_t address, uint32_t
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (!is_blacklisted(function_name) && !is_result_of_fwritex(reporter)) {
-                printf("Invalid write of size %u bits detected at address %u.\n", (*errors)[*errors_size - 1].size,
-                       (*errors)[*errors_size - 1].address);
+                printf("== Wasm Doctor == Invalid write of size %u bits detected at address %u.\n",
+                       (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
         }
 }
