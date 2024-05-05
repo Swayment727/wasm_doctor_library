@@ -23,3 +23,10 @@ move_shadow_stack_pointer(struct shadow_stack_validator *validator, struct mem_a
 
         validator->shadow_stack_pointer = address;
 }
+
+void
+shadow_stack_validator_init(struct shadow_stack_validator *validator)
+{
+        validator->shadow_stack_pointer_base = UINT32_MAX;
+        validator->shadow_stack_pointer = UINT32_MAX;
+}
