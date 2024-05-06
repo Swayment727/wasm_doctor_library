@@ -5,9 +5,7 @@ void
 check_zero_address(struct zero_address_access_validator *validator, wasmptr_t address)
 {
         if (address == 0) {
-                add_zero_address_access(validator->reporter,
-                                        validator->reporter->state
-                                                ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_zero_address_access(validator->reporter);
         }
 }
 

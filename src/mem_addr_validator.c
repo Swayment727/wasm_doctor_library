@@ -27,9 +27,7 @@ check_access(struct mem_addr_validator *validator, doctorptr_t bit_idx)
 {
         if ((validator->words[bit_idx / BYTES_PER_WORD] & (1 << bit_idx % BYTES_PER_WORD)) == 0) {
                 bool validity[1] = {false};
-                add_undefined_memory_use(validator->reporter, bit_idx, 1, validity,
-                                         validator->reporter->state
-                                                 ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_undefined_memory_use(validator->reporter, bit_idx, 1, validity);
         }
 }
 
@@ -67,9 +65,7 @@ check_region_access(struct mem_addr_validator *validator, wasmptr_t address, uin
 
         if (!is_valid) {
                 add_undefined_memory_use(validator->reporter, address, validator->reporter->state->size_in_bytes,
-                                         validity,
-                                         validator->reporter->state
-                                                 ->function_names[validator->reporter->state->function_names_size - 1]);
+                                         validity);
         }
 }
 

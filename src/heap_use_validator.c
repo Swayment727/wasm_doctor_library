@@ -43,18 +43,13 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
                                 validator->blocks[i].freed = true;
                                 return;
                         } else {
-                                add_double_free(
-                                        validator->reporter, block_start,
-                                        validator->reporter->state
-                                                ->function_names[validator->reporter->state->function_names_size - 1]);
+                                add_double_free(validator->reporter, block_start);
                                 return;
                         }
                 }
         }
 
-        add_invalid_free(
-                validator->reporter, block_start,
-                validator->reporter->state->function_names[validator->reporter->state->function_names_size - 1]);
+        add_invalid_free(validator->reporter, block_start);
 }
 
 void
@@ -75,9 +70,7 @@ check_use_after_free(struct heap_use_validator *validator, wasmptr_t address, ui
         }
 
         if (found_on_heap && !found_allocated) {
-                add_use_after_free(validator->reporter, address, size_in_bytes,
-                                   validator->reporter->state
-                                           ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_use_after_free(validator->reporter, address, size_in_bytes);
         }
 }
 
@@ -111,9 +104,7 @@ void
 check_read_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
-                add_invalid_read(validator->reporter, address, size_in_bytes,
-                                 validator->reporter->state
-                                         ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_invalid_read(validator->reporter, address, size_in_bytes);
         }
 }
 
@@ -121,9 +112,7 @@ void
 check_write_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
-                add_invalid_write(validator->reporter, address, size_in_bytes,
-                                  validator->reporter->state
-                                          ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_invalid_write(validator->reporter, address, size_in_bytes);
         }
 }
 

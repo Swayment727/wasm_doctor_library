@@ -15,9 +15,7 @@ void
 validate_get(struct local_validator *validator, uint32_t local_idx)
 {
         if (!validator->locals[validator->frames_size - 1][local_idx]) {
-                add_undefined_local_use(validator->reporter, local_idx,
-                                        validator->reporter->state
-                                                ->function_names[validator->reporter->state->function_names_size - 1]);
+                add_undefined_local_use(validator->reporter, local_idx);
         }
 }
 

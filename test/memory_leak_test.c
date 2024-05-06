@@ -57,6 +57,7 @@ test_memory_leak(void)
         assert(doctor.reporter.memory_leak_errors_size == 1);
         assert(doctor.reporter.memory_leak_errors[doctor.reporter.memory_leak_errors_size - 1].address == address);
         assert(doctor.reporter.memory_leak_errors[doctor.reporter.memory_leak_errors_size - 1].size == size_in_bytes);
+        printf("%s %s\n", doctor.reporter.memory_leak_errors[0].location.function_name, function_name);
         assert(strncmp(doctor.reporter.memory_leak_errors[0].location.function_name, function_name,
                        strlen(function_name)) == 0);
 
