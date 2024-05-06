@@ -8,7 +8,7 @@ void
 test_no_invalid_write(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -35,7 +35,7 @@ void
 test_no_invalid_write_shadow_stack(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -75,7 +75,7 @@ void
 test_invalid_write(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -109,7 +109,7 @@ void
 test_invalid_write_shadow_stack(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -147,7 +147,7 @@ void
 test_invalid_write_bounds_shadow_stack(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -183,7 +183,7 @@ void
 test_invalid_write_bounds_global_data(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -218,7 +218,7 @@ void
 test_invalid_write_bounds_malloc(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 

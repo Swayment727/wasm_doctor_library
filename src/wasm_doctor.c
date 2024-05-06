@@ -138,26 +138,17 @@ doctor_frame_exit(void)
  * @param[in] size_in_pages Size of WebAssembly memory in pages.
  */
 void
-doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages)
+doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report)
 {
         doctor = wasm_doctor;
         wasm_state_init(&doctor->state);
-        reporter_init(&doctor->reporter, &doctor->state);
+        reporter_init(&doctor->reporter, &doctor->state, report);
         local_validator_init(&doctor->local_validator, &doctor->reporter);
         heap_use_validator_init(&doctor->heap_validator, &doctor->shadow_stack_validator, &doctor->reporter);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages, &doctor->reporter);
         shadow_stack_validator_init(&doctor->shadow_stack_validator);
 
         enter_function(doctor->reporter.state, "module");
-}
-
-/**
- * Print error report.
- */
-void
-doctor_report(void)
-{
-        report(&doctor->reporter);
 }
 
 /**
@@ -183,7 +174,7 @@ doctor_exit(bool exit_reporter)
         local_validator_exit(&doctor->local_validator);
 
         if (exit_reporter) {
-                report(&doctor->reporter);
                 doctor_reporter_exit();
+                wasm_state_exit(&doctor->state);
         }
 }

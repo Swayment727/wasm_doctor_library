@@ -9,7 +9,7 @@ void
 test_no_memory_leak(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -37,7 +37,7 @@ void
 test_memory_leak(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         char *function_name = "test_function";
         doctor_frame_enter(10, function_name);

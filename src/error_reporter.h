@@ -63,6 +63,7 @@ struct invalid_write {
 
 struct error_reporter {
         struct wasm_state *state;
+        bool report;
 
         uint32_t undefined_memory_use_errors_size;
         struct undefined_memory_use *undefined_memory_use_errors;
@@ -89,17 +90,16 @@ struct error_reporter {
         struct invalid_write *invalid_write_errors;
 };
 
-void report(struct error_reporter *reporter);
 void add_undefined_memory_use(struct error_reporter *reporter, wasmptr_t address, uint8_t size, bool *validity,
                               char *function_name);
 void add_undefined_local_use(struct error_reporter *reporter, uint32_t idx, char *function_name);
-void add_use_after_free(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
-void add_memory_leak(struct error_reporter *reporter, uint32_t address, uint32_t size, char *function_name);
-void add_double_free(struct error_reporter *reporter, uint32_t address, char *function_name);
-void add_invalid_free(struct error_reporter *reporter, uint32_t address, char *function_name);
-void add_invalid_read(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name);
-void add_invalid_write(struct error_reporter *reporter, doctorptr_t address, uint32_t size, char *function_name);
-void reporter_init(struct error_reporter *reporter, struct wasm_state *state);
+void add_use_after_free(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
+void add_memory_leak(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
+void add_double_free(struct error_reporter *reporter, wasmptr_t address, char *function_name);
+void add_invalid_free(struct error_reporter *reporter, wasmptr_t address, char *function_name);
+void add_invalid_read(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
+void add_invalid_write(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
+void reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report);
 void reporter_exit(struct error_reporter *reporter);
 
 #endif /* ERROR_REPORTER */

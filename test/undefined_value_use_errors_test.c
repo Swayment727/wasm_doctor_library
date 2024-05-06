@@ -9,7 +9,7 @@ void
 test_correct_memory_use(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(0, "test_function");
 
@@ -35,7 +35,7 @@ void
 test_incorrect_memory_use(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(0, "test_function");
 
@@ -61,10 +61,6 @@ test_incorrect_memory_use(void)
         doctor_load(invalid_address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 4);
-        printf("%u %u\n",
-               doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
-                       .address,
-               invalid_address);
 
         assert(doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
                        .address == invalid_address);

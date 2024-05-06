@@ -8,7 +8,7 @@ void
 test_no_use_after_free(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
@@ -40,7 +40,7 @@ void
 test_use_after_free(void)
 {
         struct wasm_doctor doctor;
-        doctor_init(&doctor, 2);
+        doctor_init(&doctor, 2, false);
 
         doctor_frame_enter(10, "test_function");
 
