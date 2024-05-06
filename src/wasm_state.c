@@ -8,9 +8,8 @@ enter_function(struct wasm_state *state, char *function_name)
 {
         state->function_names =
                 realloc(state->function_names, ++state->function_names_size * sizeof(*state->function_names));
-        state->function_names[state->function_names_size - 1] =
-                (char *)malloc(strnlen(function_name, 50) + 1); // TODO: check strnlen
-        strncpy(state->function_names[state->function_names_size - 1], function_name, strnlen(function_name, 50) + 1);
+        state->function_names[state->function_names_size - 1] = (char *)malloc(strlen(function_name) + 1);
+        strncpy(state->function_names[state->function_names_size - 1], function_name, strlen(function_name) + 1);
 }
 
 void
