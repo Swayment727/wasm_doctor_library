@@ -11,6 +11,7 @@
 #include "shadow_stack_validator.h"
 #include "wasm_state.h"
 #include "wasm_types.h"
+#include "zero_address_access_validator.h"
 
 struct wasm_doctor {
         struct error_reporter reporter;
@@ -20,6 +21,7 @@ struct wasm_doctor {
         struct mem_addr_validator mem_validator;
         struct heap_use_validator heap_validator;
         struct local_validator local_validator;
+        struct zero_address_access_validator zero_validator;
 };
 
 void doctor_set_shadow_stack_pointer_base(wasmptr_t address);

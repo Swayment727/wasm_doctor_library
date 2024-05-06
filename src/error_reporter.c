@@ -270,6 +270,22 @@ add_invalid_write(struct error_reporter *reporter, wasmptr_t address, uint8_t si
 }
 
 void
+add_zero_address_access(struct error_reporter *reporter, char *function_name)
+{
+        struct zero_address_access **errors = &reporter->zero_address_access_errors;
+        uint32_t *errors_size = &reporter->zero_address_access_errors_size;
+
+        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+
+        SET_FUNCTION_NAME(errors, errors_size, function_name)
+
+        if (reporter->report) {
+                printf("== Wasm Doctor == Access to address zero detected.\n");
+                print_stack_trace(reporter);
+        }
+}
+
+void
 reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report)
 {
         reporter->undefined_memory_use_errors_size = 0;
@@ -295,6 +311,9 @@ reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool re
 
         reporter->invalid_write_errors_size = 0;
         reporter->invalid_write_errors = NULL;
+
+        reporter->zero_address_access_errors_size = 0;
+        reporter->zero_address_access_errors = NULL;
 
         reporter->state = state;
 
@@ -337,6 +356,10 @@ reporter_exit(struct error_reporter *reporter)
                 free(reporter->invalid_write_errors[i].location.function_name);
         }
 
+        for (uint32_t i = 0; i < reporter->zero_address_access_errors_size; ++i) {
+                free(reporter->zero_address_access_errors[i].location.function_name);
+        }
+
         free(reporter->undefined_memory_use_errors);
         free(reporter->undefined_local_use_errors);
         free(reporter->use_after_free_errors);
@@ -345,4 +368,5 @@ reporter_exit(struct error_reporter *reporter)
         free(reporter->invalid_free_errors);
         free(reporter->invalid_read_errors);
         free(reporter->invalid_write_errors);
+        free(reporter->zero_address_access_errors);
 }

@@ -9,6 +9,7 @@
 #include "wasm_doctor.h"
 #include "wasm_state.h"
 #include "wasm_types.h"
+#include "zero_address_access_validator.h"
 
 #define WASM_PAGE_SIZE 65536
 
@@ -63,6 +64,7 @@ doctor_store(wasmptr_t address, uint8_t size_in_bytes)
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
         check_write_validity(&doctor->heap_validator, address, size_in_bytes);
         validate_region(&doctor->mem_validator, address, size_in_bytes);
+        check_zero_address(&doctor->zero_validator, address);
 }
 
 /**
@@ -76,6 +78,7 @@ doctor_load(wasmptr_t address, uint8_t size_in_bytes)
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
         check_read_validity(&doctor->heap_validator, address, size_in_bytes);
         check_region_access(&doctor->mem_validator, address, size_in_bytes);
+        check_zero_address(&doctor->zero_validator, address);
 }
 
 /**
@@ -147,6 +150,7 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report
         heap_use_validator_init(&doctor->heap_validator, &doctor->shadow_stack_validator, &doctor->reporter);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages, &doctor->reporter);
         shadow_stack_validator_init(&doctor->shadow_stack_validator);
+        zero_address_access_validator_init(&doctor->zero_validator, &doctor->reporter);
 
         enter_function(doctor->reporter.state, "module");
 }

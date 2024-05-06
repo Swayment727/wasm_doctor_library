@@ -61,6 +61,12 @@ struct invalid_write {
         struct error_location location;
 };
 
+struct zero_address_access {
+        wasmptr_t address;
+        uint32_t size;
+        struct error_location location;
+};
+
 struct error_reporter {
         struct wasm_state *state;
         bool report;
@@ -88,6 +94,9 @@ struct error_reporter {
 
         uint32_t invalid_write_errors_size;
         struct invalid_write *invalid_write_errors;
+
+        uint32_t zero_address_access_errors_size;
+        struct zero_address_access *zero_address_access_errors;
 };
 
 void add_undefined_memory_use(struct error_reporter *reporter, wasmptr_t address, uint8_t size, bool *validity,
@@ -99,6 +108,7 @@ void add_double_free(struct error_reporter *reporter, wasmptr_t address, char *f
 void add_invalid_free(struct error_reporter *reporter, wasmptr_t address, char *function_name);
 void add_invalid_read(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
 void add_invalid_write(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, char *function_name);
+void add_zero_address_access(struct error_reporter *reporter, char *function_name);
 void reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report);
 void reporter_exit(struct error_reporter *reporter);
 
