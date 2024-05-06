@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "error_reporter.h"
@@ -34,38 +35,39 @@ check_access(struct mem_addr_validator *validator, doctorptr_t bit_idx)
 }
 
 void
-validate_region(struct mem_addr_validator *validator, doctorptr_t bit_idx_start, doctorptr_t bit_idx_end)
+validate_region(struct mem_addr_validator *validator, wasmptr_t address, uint32_t size_in_bytes)
 {
-        for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
+        for (uint32_t i = address * 8; i < (address + size_in_bytes) * 8 - 1; ++i) {
                 validate(validator, i);
         }
 }
 
 void
-invalidate_region(struct mem_addr_validator *validator, doctorptr_t bit_idx_start, doctorptr_t bit_idx_end)
+invalidate_region(struct mem_addr_validator *validator, wasmptr_t address, uint32_t size_in_bytes)
 {
-        for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
+
+        for (uint32_t i = address * 8; i < (address + size_in_bytes) * 8 - 1; ++i) {
                 invalidate(validator, i);
         }
 }
 
 void
-check_region_access(struct mem_addr_validator *validator, doctorptr_t bit_idx_start, doctorptr_t bit_idx_end)
+check_region_access(struct mem_addr_validator *validator, wasmptr_t address, uint32_t size_in_bytes)
 {
-        bool validity[bit_idx_end - bit_idx_start];
+        bool validity[size_in_bytes * 8];
 
         bool is_valid = true;
-        for (uint32_t i = bit_idx_start; i <= bit_idx_end; ++i) {
+        for (uint32_t i = address * 8; i < (address + size_in_bytes) * 8 - 1; ++i) {
                 if ((validator->words[i / BYTES_PER_WORD] & (1 << i % BYTES_PER_WORD)) == 0) {
                         is_valid = false;
-                        validity[i - bit_idx_start] = false;
+                        validity[i - address * 8] = false;
                 } else {
-                        validity[i - bit_idx_start] = true;
+                        validity[i - address * 8] = true;
                 }
         }
 
         if (!is_valid) {
-                add_undefined_memory_use(validator->reporter, bit_idx_start, validator->reporter->state->bit_size,
+                add_undefined_memory_use(validator->reporter, address, validator->reporter->state->size_in_bytes,
                                          validity,
                                          validator->reporter->state
                                                  ->function_names[validator->reporter->state->function_names_size - 1]);
@@ -75,8 +77,8 @@ check_region_access(struct mem_addr_validator *validator, doctorptr_t bit_idx_st
 void
 mem_addr_validator_init(struct mem_addr_validator *validator, uint32_t mem_size, struct error_reporter *reporter)
 {
-        validator->words = (word_t *)malloc(mem_size);
-        invalidate_region(validator, 0, mem_size - 1);
+        validator->words = (word_t *)malloc(mem_size * 8);
+        invalidate_region(validator, 0, mem_size);
 
         validator->reporter = reporter;
 }

@@ -15,14 +15,14 @@ test_no_use_after_free(void)
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
         wasmptr_t address = 42;
-        uint32_t bit_size = 32;
+        uint32_t bytes = 4;
 
         doctor_register_malloc(address, 100);
 
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
-        doctor_store(address, bit_size);
-        doctor_load(address, bit_size);
+        doctor_store(address, bytes);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
@@ -47,33 +47,33 @@ test_use_after_free(void)
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
         wasmptr_t address = 42;
-        doctor_register_malloc(address, 100);
+        doctor_register_malloc(address, 12);
         doctor_register_free(address);
 
-        uint32_t bit_size = 32;
-        doctor_store(address, bit_size);
+        uint32_t bytes = 4;
+        doctor_store(address, bytes);
 
         assert(doctor.reporter.use_after_free_errors_size == 1);
         assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].address ==
-               address * 8);
-        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bit_size);
+               address);
+        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bytes);
 
-        doctor_load(address, bit_size);
-
-        assert(doctor.reporter.use_after_free_errors_size == 2);
-        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].address ==
-               address * 8);
-        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bit_size);
-
-        doctor_register_malloc(address, 200);
-
-        doctor_store(address, bit_size);
-        doctor_load(address, bit_size);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.use_after_free_errors_size == 2);
         assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].address ==
-               address * 8);
-        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bit_size);
+               address);
+        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bytes);
+
+        doctor_register_malloc(address, 24);
+
+        doctor_store(address, bytes);
+        doctor_load(address, bytes);
+
+        assert(doctor.reporter.use_after_free_errors_size == 2);
+        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].address ==
+               address);
+        assert(doctor.reporter.use_after_free_errors[doctor.reporter.use_after_free_errors_size - 1].size == bytes);
 
         doctor_register_free(address);
 

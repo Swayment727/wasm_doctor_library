@@ -6,12 +6,12 @@
 struct wasm_state {
         uint32_t function_names_size;
         char **function_names;
-        uint32_t bit_size;
+        uint8_t size_in_bytes;
 };
 
 void enter_function(struct wasm_state *state, char *function_name);
 void exit_function(struct wasm_state *state);
-void set_bit_size(struct wasm_state *state, uint32_t bit_size);
+void set_byte_size(struct wasm_state *state, uint8_t size_in_bytes);
 void wasm_state_init(struct wasm_state *state);
 void wasm_state_exit(struct wasm_state *state);
 

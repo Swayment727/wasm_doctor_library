@@ -14,12 +14,12 @@ test_correct_memory_use(void)
         doctor_frame_enter(0, "test_function");
 
         wasmptr_t address = 42;
-        uint32_t bit_size = 32;
-        doctor_store(address, bit_size);
+        uint8_t bytes = 4;
+        doctor_store(address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 0);
 
-        doctor_load(address, bit_size);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 0);
 
@@ -40,36 +40,41 @@ test_incorrect_memory_use(void)
         doctor_frame_enter(0, "test_function");
 
         wasmptr_t address = 42;
-        uint32_t bit_size = 32;
-        doctor_store(address, bit_size);
+        uint8_t bytes = 4;
+        doctor_store(address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 0);
 
-        doctor_load(address - 1, bit_size);
+        doctor_load(address - 1, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 1);
 
-        doctor_load(address - 32, bit_size);
+        doctor_load(address - 32, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 2);
 
-        doctor_load(address, bit_size + 1);
+        doctor_load(address, bytes + 1);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 3);
 
-        wasmptr_t invalid_address = address + 10;
-        doctor_load(invalid_address, bit_size);
+        wasmptr_t invalid_address = address + 2;
+        doctor_load(invalid_address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 4);
+        printf("%u %u\n",
+               doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
+                       .address,
+               invalid_address);
+
         assert(doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
-                       .address == invalid_address * 8);
+                       .address == invalid_address);
         bool validity[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                            1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         assert(memcmp(doctor.reporter.undefined_memory_use_errors[doctor.reporter.undefined_memory_use_errors_size - 1]
                               .validity,
-                      validity, bit_size));
+                      validity, bytes * 8));
 
-        doctor_load(address, bit_size);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 4);
 

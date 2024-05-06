@@ -230,7 +230,7 @@ report(struct error_reporter *reporter)
 }
 
 void
-add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, uint32_t size, bool *validity,
+add_undefined_memory_use(struct error_reporter *reporter, wasmptr_t address, uint8_t size_in_bytes, bool *validity,
                          char *function_name)
 {
         struct undefined_memory_use **errors = &reporter->undefined_memory_use_errors;
@@ -238,9 +238,10 @@ add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, u
 
         *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
-        (*errors)[*errors_size - 1].size = size;
-        (*errors)[*errors_size - 1].validity = malloc(size * sizeof(*((*errors)[*errors_size - 1].validity)));
-        memcpy((*errors)[*errors_size - 1].validity, validity, size);
+        (*errors)[*errors_size - 1].size = size_in_bytes;
+        (*errors)[*errors_size - 1].validity =
+                malloc(size_in_bytes * 8 * sizeof(*((*errors)[*errors_size - 1].validity)));
+        memcpy((*errors)[*errors_size - 1].validity, validity, size_in_bytes * 8);
 
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
@@ -250,7 +251,7 @@ add_undefined_memory_use(struct error_reporter *reporter, doctorptr_t address, u
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
 
                 printf("== Wasm Doctor == validity: ");
-                for (uint32_t j = 0; j < (*errors)[*errors_size - 1].size; ++j) {
+                for (uint32_t j = 0; j < (*errors)[*errors_size - 1].size * 8; ++j) {
                         printf("%u", (*errors)[*errors_size - 1].validity[j]);
                 }
                 printf("\n");

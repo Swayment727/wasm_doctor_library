@@ -17,8 +17,8 @@ move_shadow_stack_pointer(struct shadow_stack_validator *validator, struct mem_a
         }
 
         if (address > validator->shadow_stack_pointer) {
-
-                invalidate_region(mem_validator, validator->shadow_stack_pointer * 8, address * 8);
+                invalidate_region(mem_validator, validator->shadow_stack_pointer,
+                                  address - validator->shadow_stack_pointer);
         }
 
         validator->shadow_stack_pointer = address;

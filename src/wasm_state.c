@@ -20,9 +20,9 @@ exit_function(struct wasm_state *state)
 }
 
 void
-set_bit_size(struct wasm_state *state, uint32_t bit_size)
+set_byte_size(struct wasm_state *state, uint8_t size_in_bytes)
 {
-        state->bit_size = bit_size;
+        state->size_in_bytes = size_in_bytes;
 }
 
 void

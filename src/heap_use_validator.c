@@ -58,15 +58,14 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
 }
 
 void
-check_use_after_free(struct heap_use_validator *validator, doctorptr_t address,
-                     uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
+check_use_after_free(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
         bool found_on_heap = false;
         bool found_allocated = false;
 
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {
-                if (validator->blocks[i].block_start * 8 <= address + bit_size &&
-                    address < validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
+                if (validator->blocks[i].block_start <= address + size_in_bytes &&
+                    address < validator->blocks[i].block_start + validator->blocks[i].size_in_bytes) {
                         found_on_heap = true;
 
                         if (validator->blocks[i].freed == false) {
@@ -76,32 +75,31 @@ check_use_after_free(struct heap_use_validator *validator, doctorptr_t address,
         }
 
         if (found_on_heap && !found_allocated) {
-                add_use_after_free(validator->reporter, address, bit_size,
+                add_use_after_free(validator->reporter, address, size_in_bytes,
                                    validator->reporter->state
                                            ->function_names[validator->reporter->state->function_names_size - 1]);
         }
 }
 
 static bool
-is_read_write_valid(struct heap_use_validator *validator, doctorptr_t address, uint32_t bit_size)
+is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
-        if (validator->shadow_stack_validator->shadow_stack_pointer * 8 <= address &&
-            address + bit_size <= validator->shadow_stack_validator->shadow_stack_pointer_base * 8) {
+        if (validator->shadow_stack_validator->shadow_stack_pointer <= address &&
+            address + size_in_bytes <= validator->shadow_stack_validator->shadow_stack_pointer_base) {
                 return true;
         }
 
         for (uint32_t i = 0; i < validator->global_blocks_size; ++i) {
-                if (validator->global_blocks[i].block_start * 8 <= address &&
-                    address + bit_size <= validator->global_blocks[i].block_start * 8 +
-                                                  validator->global_blocks[i].size_in_bytes * 8) {
+                if (validator->global_blocks[i].block_start <= address &&
+                    address + size_in_bytes <=
+                            validator->global_blocks[i].block_start + validator->global_blocks[i].size_in_bytes) {
                         return true;
                 }
         }
 
         for (uint32_t i = 0; i < validator->blocks_size; ++i) {
-                if (validator->blocks[i].block_start * 8 <= address &&
-                    address + bit_size <=
-                            validator->blocks[i].block_start * 8 + validator->blocks[i].size_in_bytes * 8) {
+                if (validator->blocks[i].block_start <= address &&
+                    address + size_in_bytes <= validator->blocks[i].block_start + validator->blocks[i].size_in_bytes) {
                         return true;
                 }
         }
@@ -110,22 +108,20 @@ is_read_write_valid(struct heap_use_validator *validator, doctorptr_t address, u
 }
 
 void
-check_read_validity(struct heap_use_validator *validator, doctorptr_t address,
-                    uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
+check_read_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
-        if (!is_read_write_valid(validator, address, bit_size)) {
-                add_invalid_read(validator->reporter, address, bit_size,
+        if (!is_read_write_valid(validator, address, size_in_bytes)) {
+                add_invalid_read(validator->reporter, address, size_in_bytes,
                                  validator->reporter->state
                                          ->function_names[validator->reporter->state->function_names_size - 1]);
         }
 }
 
 void
-check_write_validity(struct heap_use_validator *validator, doctorptr_t address,
-                     uint32_t bit_size) // TODO: check address - it is in bit form, will it fit?
+check_write_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
 {
-        if (!is_read_write_valid(validator, address, bit_size)) {
-                add_invalid_write(validator->reporter, address, bit_size,
+        if (!is_read_write_valid(validator, address, size_in_bytes)) {
+                add_invalid_write(validator->reporter, address, size_in_bytes,
                                   validator->reporter->state
                                           ->function_names[validator->reporter->state->function_names_size - 1]);
         }

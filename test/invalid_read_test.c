@@ -15,12 +15,12 @@ test_no_invalid_read(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 42;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
         doctor_register_malloc(address, 100);
 
-        doctor_store(address, bit_size);
-        doctor_load(address, bit_size);
+        doctor_store(address, bytes);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
@@ -43,24 +43,24 @@ test_no_invalid_read_shadow_stack(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 64;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address / 8);
-        doctor_move_shadow_stack_pointer(address / 8 - 4);
+        doctor_set_shadow_stack_pointer_base(address);
+        doctor_move_shadow_stack_pointer(address - 4);
 
-        doctor_load(address / 8 - 4, bit_size);
-
-        assert(doctor.reporter.invalid_read_errors_size == 0);
-
-        doctor_store(address / 8 - 4, bit_size);
-        doctor_load(address / 8 - 4, bit_size);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        doctor_move_shadow_stack_pointer(address / 8);
+        doctor_store(address - 4, bytes);
+        doctor_load(address - 4, bytes);
 
-        doctor_store(address / 8 - 4, bit_size);
-        doctor_load(address / 8 - 4, bit_size);
+        assert(doctor.reporter.invalid_read_errors_size == 0);
+
+        doctor_move_shadow_stack_pointer(address);
+
+        doctor_store(address - 4, bytes);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
@@ -83,14 +83,14 @@ test_invalid_read(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 42;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_load(address, bit_size);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
-        doctor_store(address, bit_size);
-        doctor_load(address, bit_size);
+        doctor_store(address, bytes);
+        doctor_load(address, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
@@ -113,22 +113,22 @@ test_invalid_read_shadow_stack(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 64;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address / 8);
-        doctor_move_shadow_stack_pointer(address / 8 - 4);
+        doctor_set_shadow_stack_pointer_base(address);
+        doctor_move_shadow_stack_pointer(address - 4);
 
-        doctor_load(address / 8 - 2, bit_size);
+        doctor_load(address - 2, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
-        doctor_store(address / 8 - 2, bit_size);
-        doctor_load(address / 8 - 2, bit_size);
+        doctor_store(address - 2, bytes);
+        doctor_load(address - 2, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
-        doctor_store(address / 8 - 4, bit_size);
-        doctor_load(address / 8 - 4, bit_size);
+        doctor_store(address - 4, bytes);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
@@ -151,20 +151,20 @@ test_invalid_read_bounds_shadow_stack(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 64;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address / 8);
-        doctor_move_shadow_stack_pointer(address / 8 - 4);
+        doctor_set_shadow_stack_pointer_base(address);
+        doctor_move_shadow_stack_pointer(address - 4);
 
-        doctor_load(address / 8 - 4, bit_size);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        doctor_load(address / 8 - 4, bit_size + 1);
+        doctor_load(address - 4, bytes + 1);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
-        doctor_load(address / 8 - 3, bit_size);
+        doctor_load(address - 3, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
@@ -187,19 +187,19 @@ test_invalid_read_bounds_global_data(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 64;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_global_data_validate(address / 8 - 4, bit_size);
+        doctor_global_data_validate(address - 4, bytes);
 
-        doctor_load(address / 8 - 4, bit_size);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        doctor_load(address / 8 - 4, bit_size + 1);
+        doctor_load(address - 4, bytes + 1);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
-        doctor_load(address / 8 - 3, bit_size);
+        doctor_load(address - 3, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
@@ -222,19 +222,19 @@ test_invalid_read_bounds_malloc(void)
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
         wasmptr_t address = 64;
-        uint32_t bit_size = 32;
+        uint8_t bytes = 4;
 
-        doctor_register_malloc(address / 8 - 4, bit_size / 8);
+        doctor_register_malloc(address - 4, bytes);
 
-        doctor_load(address / 8 - 4, bit_size);
+        doctor_load(address - 4, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        doctor_load(address / 8 - 4, bit_size + 1);
+        doctor_load(address - 4, bytes + 1);
 
         assert(doctor.reporter.invalid_read_errors_size == 1);
 
-        doctor_load(address / 8 - 3, bit_size);
+        doctor_load(address - 3, bytes);
 
         assert(doctor.reporter.invalid_read_errors_size == 2);
 
