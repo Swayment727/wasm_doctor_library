@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_no_memory_leak(void)
@@ -15,7 +14,7 @@ test_no_memory_leak(void)
 
         assert(doctor.reporter.memory_leak_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
 
         doctor_register_malloc(address, 100);
         doctor_register_free(address);
@@ -44,7 +43,7 @@ test_memory_leak(void)
 
         assert(doctor.reporter.memory_leak_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint32_t size_in_bytes = 100;
 
         doctor_register_malloc(address, size_in_bytes);

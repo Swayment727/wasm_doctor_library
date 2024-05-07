@@ -13,7 +13,7 @@ test_correct_zero_address_access_use(void)
 
         assert(doctor.reporter.invalid_write_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint8_t bytes = 4;
 
         doctor_register_malloc(address, 100);
@@ -40,7 +40,7 @@ test_incorrect_zero_address_access_use(void)
 
         assert(doctor.reporter.invalid_write_errors_size == 0);
 
-        wasmptr_t address = 0;
+        size_t address = 0;
         uint8_t bytes = 4;
 
         doctor_register_malloc(address, 100);

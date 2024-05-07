@@ -7,7 +7,7 @@
 #include "heap_use_validator.h"
 
 void
-register_global_data(struct heap_use_validator *validator, wasmptr_t address, uint32_t size_in_bytes)
+register_global_data(struct heap_use_validator *validator, size_t address, size_t size_in_bytes)
 {
         validator->global_blocks =
                 realloc(validator->global_blocks, ++validator->global_blocks_size * sizeof(*validator->global_blocks));
@@ -16,7 +16,7 @@ register_global_data(struct heap_use_validator *validator, wasmptr_t address, ui
 }
 
 void
-register_malloc(struct heap_use_validator *validator, wasmptr_t block_start, uint32_t size_in_bytes)
+register_malloc(struct heap_use_validator *validator, size_t block_start, size_t size_in_bytes)
 {
         validator->blocks = realloc(validator->blocks, ++validator->blocks_size * sizeof(*validator->blocks));
         validator->blocks[validator->blocks_size - 1].block_start = block_start;
@@ -35,9 +35,9 @@ register_malloc(struct heap_use_validator *validator, wasmptr_t block_start, uin
 }
 
 void
-register_free(struct heap_use_validator *validator, wasmptr_t block_start)
+register_free(struct heap_use_validator *validator, size_t block_start)
 {
-        for (uint32_t i = 0; i < validator->blocks_size; ++i) {
+        for (size_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].block_start == block_start) {
                         if (validator->blocks[i].freed == false) {
                                 validator->blocks[i].freed = true;
@@ -53,12 +53,12 @@ register_free(struct heap_use_validator *validator, wasmptr_t block_start)
 }
 
 void
-check_use_after_free(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
+check_use_after_free(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         bool found_on_heap = false;
         bool found_allocated = false;
 
-        for (uint32_t i = 0; i < validator->blocks_size; ++i) {
+        for (size_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].block_start <= address + size_in_bytes &&
                     address < validator->blocks[i].block_start + validator->blocks[i].size_in_bytes) {
                         found_on_heap = true;
@@ -75,14 +75,14 @@ check_use_after_free(struct heap_use_validator *validator, wasmptr_t address, ui
 }
 
 static bool
-is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
+is_read_write_valid(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         if (validator->shadow_stack_validator->shadow_stack_pointer <= address &&
             address + size_in_bytes <= validator->shadow_stack_validator->shadow_stack_pointer_base) {
                 return true;
         }
 
-        for (uint32_t i = 0; i < validator->global_blocks_size; ++i) {
+        for (size_t i = 0; i < validator->global_blocks_size; ++i) {
                 if (validator->global_blocks[i].block_start <= address &&
                     address + size_in_bytes <=
                             validator->global_blocks[i].block_start + validator->global_blocks[i].size_in_bytes) {
@@ -90,7 +90,7 @@ is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uin
                 }
         }
 
-        for (uint32_t i = 0; i < validator->blocks_size; ++i) {
+        for (size_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].block_start <= address &&
                     address + size_in_bytes <= validator->blocks[i].block_start + validator->blocks[i].size_in_bytes) {
                         return true;
@@ -101,7 +101,7 @@ is_read_write_valid(struct heap_use_validator *validator, wasmptr_t address, uin
 }
 
 void
-check_read_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
+check_read_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
                 add_invalid_read(validator->reporter, address, size_in_bytes);
@@ -109,7 +109,7 @@ check_read_validity(struct heap_use_validator *validator, wasmptr_t address, uin
 }
 
 void
-check_write_validity(struct heap_use_validator *validator, wasmptr_t address, uint8_t size_in_bytes)
+check_write_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
                 add_invalid_write(validator->reporter, address, size_in_bytes);
@@ -133,7 +133,7 @@ heap_use_validator_init(struct heap_use_validator *validator, struct shadow_stac
 void
 heap_use_validator_exit(struct heap_use_validator *validator)
 {
-        for (uint32_t i = 0; i < validator->blocks_size; ++i) {
+        for (size_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].freed == false) {
 
                         add_memory_leak(validator->reporter, validator->blocks[i].block_start,

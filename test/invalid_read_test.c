@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_no_invalid_read(void)
@@ -14,7 +13,7 @@ test_no_invalid_read(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint8_t bytes = 4;
 
         doctor_register_malloc(address, 100);
@@ -42,7 +41,7 @@ test_no_invalid_read_shadow_stack(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 64;
+        size_t address = 64;
         uint8_t bytes = 4;
 
         doctor_set_shadow_stack_pointer_base(address);
@@ -82,7 +81,7 @@ test_invalid_read(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint8_t bytes = 4;
 
         doctor_load(address, bytes);
@@ -112,7 +111,7 @@ test_invalid_read_shadow_stack(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 64;
+        size_t address = 64;
         uint8_t bytes = 4;
 
         doctor_set_shadow_stack_pointer_base(address);
@@ -150,7 +149,7 @@ test_invalid_read_bounds_shadow_stack(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 64;
+        size_t address = 64;
         uint8_t bytes = 4;
 
         doctor_set_shadow_stack_pointer_base(address);
@@ -186,7 +185,7 @@ test_invalid_read_bounds_global_data(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 64;
+        size_t address = 64;
         uint8_t bytes = 4;
 
         doctor_global_data_validate(address - 4, bytes);
@@ -221,7 +220,7 @@ test_invalid_read_bounds_malloc(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        wasmptr_t address = 64;
+        size_t address = 64;
         uint8_t bytes = 4;
 
         doctor_register_malloc(address - 4, bytes);

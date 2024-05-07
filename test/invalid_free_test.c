@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_no_invalid_free(void)
@@ -14,7 +13,7 @@ test_no_invalid_free(void)
 
         assert(doctor.reporter.invalid_free_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
 
         doctor_register_malloc(address, 100);
         doctor_register_free(address);
@@ -39,11 +38,11 @@ test_invalid_free(void)
 
         assert(doctor.reporter.invalid_free_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
 
         doctor_register_malloc(address, 100);
 
-        wasmptr_t invalid_address = 180;
+        size_t invalid_address = 180;
         doctor_register_free(invalid_address);
 
         assert(doctor.reporter.invalid_free_errors_size == 1);

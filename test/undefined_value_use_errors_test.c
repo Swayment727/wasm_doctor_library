@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_correct_memory_use(void)
@@ -13,7 +12,7 @@ test_correct_memory_use(void)
 
         doctor_frame_enter(0, "test_function");
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint8_t bytes = 4;
         doctor_store(address, bytes);
 
@@ -39,7 +38,7 @@ test_incorrect_memory_use(void)
 
         doctor_frame_enter(0, "test_function");
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         uint8_t bytes = 4;
         doctor_store(address, bytes);
 
@@ -57,7 +56,7 @@ test_incorrect_memory_use(void)
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 3);
 
-        wasmptr_t invalid_address = address + 2;
+        size_t invalid_address = address + 2;
         doctor_load(invalid_address, bytes);
 
         assert(doctor.reporter.undefined_memory_use_errors_size == 4);

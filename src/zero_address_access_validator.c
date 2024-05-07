@@ -2,7 +2,7 @@
 #include "error_reporter.h"
 
 void
-check_zero_address(struct zero_address_access_validator *validator, wasmptr_t address)
+check_zero_address(struct zero_address_access_validator *validator, size_t address)
 {
         if (address == 0) {
                 add_zero_address_access(validator->reporter);

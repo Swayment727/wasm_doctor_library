@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_no_double_free(void)
@@ -14,7 +13,7 @@ test_no_double_free(void)
 
         assert(doctor.reporter.double_free_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
 
         doctor_register_malloc(address, 100);
         doctor_register_free(address);
@@ -39,7 +38,7 @@ test_double_free(void)
 
         assert(doctor.reporter.double_free_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
 
         doctor_register_malloc(address, 100);
         doctor_register_free(address);

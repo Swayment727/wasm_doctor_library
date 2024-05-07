@@ -10,7 +10,6 @@
 #include "mem_addr_validator.h"
 #include "shadow_stack_validator.h"
 #include "wasm_state.h"
-#include "wasm_types.h"
 #include "zero_address_access_validator.h"
 
 struct wasm_doctor {
@@ -24,13 +23,13 @@ struct wasm_doctor {
         struct zero_address_access_validator zero_validator;
 };
 
-void doctor_set_shadow_stack_pointer_base(wasmptr_t address);
-void doctor_move_shadow_stack_pointer(wasmptr_t address);
-void doctor_global_data_validate(wasmptr_t address, uint32_t size_in_bytes);
-void doctor_store(wasmptr_t address, uint8_t size_in_bytes);
-void doctor_load(wasmptr_t address, uint8_t size_in_bytes);
-void doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes);
-void doctor_register_free(wasmptr_t block_start);
+void doctor_set_shadow_stack_pointer_base(size_t address);
+void doctor_move_shadow_stack_pointer(size_t address);
+void doctor_global_data_validate(size_t address, size_t size_in_bytes);
+void doctor_store(size_t address, uint8_t size_in_bytes);
+void doctor_load(size_t address, uint8_t size_in_bytes);
+void doctor_register_malloc(size_t block_start, size_t size_in_bytes);
+void doctor_register_free(size_t block_start);
 void doctor_local_set(uint32_t idx);
 void doctor_local_get(uint32_t idx);
 void doctor_frame_enter(uint32_t locals_size, char *function_name);

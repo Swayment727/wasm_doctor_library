@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "wasm_doctor.h"
-#include "wasm_types.h"
 
 void
 test_no_use_after_free(void)
@@ -14,8 +13,8 @@ test_no_use_after_free(void)
 
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
-        wasmptr_t address = 42;
-        uint32_t bytes = 4;
+        size_t address = 42;
+        uint8_t bytes = 4;
 
         doctor_register_malloc(address, 100);
 
@@ -46,11 +45,11 @@ test_use_after_free(void)
 
         assert(doctor.reporter.use_after_free_errors_size == 0);
 
-        wasmptr_t address = 42;
+        size_t address = 42;
         doctor_register_malloc(address, 12);
         doctor_register_free(address);
 
-        uint32_t bytes = 4;
+        uint8_t bytes = 4;
         doctor_store(address, bytes);
 
         assert(doctor.reporter.use_after_free_errors_size == 1);

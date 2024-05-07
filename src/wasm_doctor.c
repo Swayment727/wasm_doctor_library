@@ -8,7 +8,7 @@
 #include "shadow_stack_validator.h"
 #include "wasm_doctor.h"
 #include "wasm_state.h"
-#include "wasm_types.h"
+
 #include "zero_address_access_validator.h"
 
 #define WASM_PAGE_SIZE 65536
@@ -23,7 +23,7 @@ struct wasm_doctor *doctor;
  * @param[in] address Address of the shadow stack pointer base.
  */
 void
-doctor_set_shadow_stack_pointer_base(wasmptr_t address)
+doctor_set_shadow_stack_pointer_base(size_t address)
 {
         set_shadow_stack_pointer_base(&doctor->shadow_stack_validator, address);
 }
@@ -37,7 +37,7 @@ doctor_set_shadow_stack_pointer_base(wasmptr_t address)
  * @param[in] address New address of the shadow stack pointer.
  */
 void
-doctor_move_shadow_stack_pointer(wasmptr_t address)
+doctor_move_shadow_stack_pointer(size_t address)
 {
         move_shadow_stack_pointer(&doctor->shadow_stack_validator, &doctor->mem_validator, address);
 }
@@ -47,7 +47,7 @@ doctor_move_shadow_stack_pointer(wasmptr_t address)
  * @param[in] size_in_bytes Size of the global data to be validated in bytes.
  */
 void
-doctor_global_data_validate(wasmptr_t address, uint32_t size_in_bytes)
+doctor_global_data_validate(size_t address, size_t size_in_bytes)
 {
         validate_region(&doctor->mem_validator, address, size_in_bytes);
         register_global_data(&doctor->heap_validator, address, size_in_bytes);
@@ -58,7 +58,7 @@ doctor_global_data_validate(wasmptr_t address, uint32_t size_in_bytes)
  * @param[in] size_in_bytes Size of the store in bytes.
  */
 void
-doctor_store(wasmptr_t address, uint8_t size_in_bytes)
+doctor_store(size_t address, uint8_t size_in_bytes)
 {
         set_byte_size(doctor->reporter.state, size_in_bytes);
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
@@ -72,7 +72,7 @@ doctor_store(wasmptr_t address, uint8_t size_in_bytes)
  * @param[in] size_in_bytes Size of the load in bytes.
  */
 void
-doctor_load(wasmptr_t address, uint8_t size_in_bytes)
+doctor_load(size_t address, uint8_t size_in_bytes)
 {
         set_byte_size(doctor->reporter.state, size_in_bytes);
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
@@ -86,7 +86,7 @@ doctor_load(wasmptr_t address, uint8_t size_in_bytes)
  * @param[in] size_in_bytes Size of the allocated block.
  */
 void
-doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes)
+doctor_register_malloc(size_t block_start, size_t size_in_bytes)
 {
         register_malloc(&doctor->heap_validator, block_start, size_in_bytes);
 }
@@ -95,7 +95,7 @@ doctor_register_malloc(wasmptr_t block_start, uint32_t size_in_bytes)
  * @param[in] block_start Start address of the allocated block.
  */
 void
-doctor_register_free(wasmptr_t block_start)
+doctor_register_free(size_t block_start)
 {
         register_free(&doctor->heap_validator, block_start);
 }
