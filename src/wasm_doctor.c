@@ -163,7 +163,6 @@ void
 doctor_reporter_exit(void)
 {
         reporter_exit(&doctor->reporter);
-        wasm_state_exit(&doctor->state);
 }
 
 /**
@@ -179,6 +178,5 @@ doctor_exit(bool exit_reporter)
 
         if (exit_reporter) {
                 doctor_reporter_exit();
-                wasm_state_exit(&doctor->state);
         }
 }
