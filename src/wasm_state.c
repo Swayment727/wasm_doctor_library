@@ -7,7 +7,7 @@ void
 enter_function(struct wasm_state *state, char *function_name)
 {
         state->function_names =
-                realloc(state->function_names, ++state->function_names_size * sizeof(*state->function_names));
+                (char **)realloc(state->function_names, ++state->function_names_size * sizeof(*state->function_names));
         state->function_names[state->function_names_size - 1] = (char *)malloc(strlen(function_name) + 1);
         strncpy(state->function_names[state->function_names_size - 1], function_name, strlen(function_name) + 1);
 }

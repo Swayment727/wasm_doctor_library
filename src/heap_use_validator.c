@@ -9,8 +9,8 @@
 void
 register_global_data(struct heap_use_validator *validator, size_t address, size_t size_in_bytes)
 {
-        validator->global_blocks =
-                realloc(validator->global_blocks, ++validator->global_blocks_size * sizeof(*validator->global_blocks));
+        validator->global_blocks = (struct global_block *)realloc(
+                validator->global_blocks, ++validator->global_blocks_size * sizeof(*validator->global_blocks));
         validator->global_blocks[validator->global_blocks_size - 1].block_start = address;
         validator->global_blocks[validator->global_blocks_size - 1].size_in_bytes = size_in_bytes;
 }
@@ -18,7 +18,8 @@ register_global_data(struct heap_use_validator *validator, size_t address, size_
 void
 register_malloc(struct heap_use_validator *validator, size_t block_start, size_t size_in_bytes)
 {
-        validator->blocks = realloc(validator->blocks, ++validator->blocks_size * sizeof(*validator->blocks));
+        validator->blocks = (struct allocated_block *)realloc(validator->blocks,
+                                                              ++validator->blocks_size * sizeof(*validator->blocks));
         validator->blocks[validator->blocks_size - 1].block_start = block_start;
         validator->blocks[validator->blocks_size - 1].size_in_bytes = size_in_bytes;
         validator->blocks[validator->blocks_size - 1].freed = false;

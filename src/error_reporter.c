@@ -8,7 +8,7 @@
 
 #define SET_FUNCTION_NAME(errors, errors_size, function_name)                                                          \
         {                                                                                                              \
-                (*errors)[*errors_size - 1].location.function_name = malloc(strnlen(function_name, 50) + 1);           \
+                (*errors)[*errors_size - 1].location.function_name = (char *)malloc(strnlen(function_name, 50) + 1);   \
                 strncpy((*errors)[*errors_size - 1].location.function_name, function_name,                             \
                         strnlen(function_name, 50) + 1);                                                               \
         }
@@ -112,7 +112,7 @@ add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_
         struct undefined_memory_use **errors = &reporter->undefined_memory_use_errors;
         size_t *errors_size = &reporter->undefined_memory_use_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct undefined_memory_use *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
         (*errors)[*errors_size - 1].validity =
@@ -143,7 +143,7 @@ add_undefined_local_use(struct error_reporter *reporter, size_t idx)
         struct undefined_local_use **errors = &reporter->undefined_local_use_errors;
         size_t *errors_size = &reporter->undefined_local_use_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct undefined_local_use *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].idx = idx;
 
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
@@ -161,7 +161,7 @@ add_use_after_free(struct error_reporter *reporter, size_t address, uint8_t size
         struct use_after_free **errors = &reporter->use_after_free_errors;
         size_t *errors_size = &reporter->use_after_free_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct use_after_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
@@ -182,7 +182,7 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
         struct memory_leak **errors = &reporter->memory_leak_errors;
         size_t *errors_size = &reporter->memory_leak_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct memory_leak *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
@@ -202,7 +202,7 @@ add_double_free(struct error_reporter *reporter, size_t address)
         struct double_free **errors = &reporter->double_free_errors;
         size_t *errors_size = &reporter->double_free_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct double_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
@@ -221,7 +221,7 @@ add_invalid_free(struct error_reporter *reporter, size_t address)
         struct invalid_free **errors = &reporter->invalid_free_errors;
         size_t *errors_size = &reporter->invalid_free_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct invalid_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
@@ -240,7 +240,7 @@ add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_i
         struct invalid_read **errors = &reporter->invalid_read_errors;
         size_t *errors_size = &reporter->invalid_read_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct invalid_read *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
@@ -260,7 +260,7 @@ add_invalid_write(struct error_reporter *reporter, size_t address, uint8_t size_
         struct invalid_write **errors = &reporter->invalid_write_errors;
         size_t *errors_size = &reporter->invalid_write_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct invalid_write *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
@@ -280,7 +280,7 @@ add_zero_address_access(struct error_reporter *reporter)
         struct zero_address_access **errors = &reporter->zero_address_access_errors;
         size_t *errors_size = &reporter->zero_address_access_errors_size;
 
-        *errors = realloc(*errors, ++(*errors_size) * sizeof(**errors));
+        *errors = (struct zero_address_access *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
 
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
