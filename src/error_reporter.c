@@ -74,6 +74,46 @@ is_writev(char *function_name)
 }
 
 static bool
+is_read(char *function_name)
+{
+        if (!strcmp(function_name, "read")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_stdio_read(char *function_name)
+{
+        if (!strcmp(function_name, "__stdio_read")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_vfscanf(char *function_name)
+{
+        if (!strcmp(function_name, "vfscanf")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_lseek(char *function_name)
+{
+        if (!strcmp(function_name, "__lseek")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
 is_result_of_fwritex(struct error_reporter *reporter)
 {
         for (size_t i = 1; i <= reporter->state->function_names_size; i++) {
@@ -122,7 +162,8 @@ add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_blacklisted(function_name) && !is_read(function_name) &&
+            !is_stdio_read(function_name) && !is_vfscanf(function_name)) {
                 printf("==Wasm Doctor== Undefined value of size %zu bytes read from address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
@@ -247,7 +288,8 @@ add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_i
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_blacklisted(function_name) && !is_stdio_read(function_name) &&
+            !is_vfscanf(function_name)) {
                 printf("==Wasm Doctor== Invalid read of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
@@ -267,7 +309,8 @@ add_invalid_write(struct error_reporter *reporter, size_t address, uint8_t size_
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name) && !is_result_of_fwritex(reporter)) {
+        if (reporter->report && !is_blacklisted(function_name) && !is_result_of_fwritex(reporter) &&
+            !is_lseek(function_name)) {
                 printf("==Wasm Doctor== Invalid write of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
