@@ -151,8 +151,6 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages, &doctor->reporter);
         shadow_stack_validator_init(&doctor->shadow_stack_validator);
         zero_address_access_validator_init(&doctor->zero_validator, &doctor->reporter);
-
-        enter_function(doctor->reporter.state, "module");
 }
 
 /**
