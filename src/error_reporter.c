@@ -133,6 +133,63 @@ is_blacklisted(char *function_name)
                is_stdio_exit(function_name) || is_isatty(function_name) || is_writev(function_name);
 }
 
+bool
+is_undefined_memory_use_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name) || is_read(function_name) || is_stdio_read(function_name) ||
+               is_vfscanf(function_name);
+}
+
+bool
+is_undefined_local_use_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name) || true;
+}
+
+bool
+is_use_after_free_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name);
+}
+
+bool
+is_memory_leak_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name);
+}
+
+bool
+is_double_free_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name);
+}
+
+bool
+is_invalid_free_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name);
+}
+
+bool
+is_invalid_read_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name) || is_stdio_read(function_name) || is_vfscanf(function_name);
+}
+
+bool
+is_invalid_write_blacklisted(struct error_reporter *reporter)
+{
+        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
+        return is_blacklisted(function_name) || is_result_of_fwritex(reporter) || is_lseek(function_name);
+}
+
 static void
 print_stack_trace(struct error_reporter *reporter)
 {
@@ -162,8 +219,7 @@ add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name) && !is_read(function_name) &&
-            !is_stdio_read(function_name) && !is_vfscanf(function_name)) {
+        if (reporter->report && !is_undefined_memory_use_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Undefined value of size %zu bytes read from address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
@@ -190,7 +246,7 @@ add_undefined_local_use(struct error_reporter *reporter, size_t idx)
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name) && false) { // TODO: ignore?
+        if (reporter->report && !is_undefined_local_use_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Undefined local with index %zu read.\n", (*errors)[*errors_size - 1].idx);
                 print_stack_trace(reporter);
         }
@@ -209,7 +265,7 @@ add_use_after_free(struct error_reporter *reporter, size_t address, uint8_t size
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_use_after_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Use after free of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
@@ -229,7 +285,7 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
 
         SET_FUNCTION_NAME(errors, errors_size, function_name) // TODO: check macro
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_memory_leak_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
@@ -249,7 +305,7 @@ add_double_free(struct error_reporter *reporter, size_t address)
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_double_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Double free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
@@ -268,7 +324,7 @@ add_invalid_free(struct error_reporter *reporter, size_t address)
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name);
 
-        if (reporter->report && !is_blacklisted(function_name)) {
+        if (reporter->report && !is_invalid_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
@@ -288,8 +344,7 @@ add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_i
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name) && !is_stdio_read(function_name) &&
-            !is_vfscanf(function_name)) {
+        if (reporter->report && !is_invalid_read_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid read of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
@@ -309,8 +364,7 @@ add_invalid_write(struct error_reporter *reporter, size_t address, uint8_t size_
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         SET_FUNCTION_NAME(errors, errors_size, function_name)
 
-        if (reporter->report && !is_blacklisted(function_name) && !is_result_of_fwritex(reporter) &&
-            !is_lseek(function_name)) {
+        if (reporter->report && !is_invalid_write_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid write of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);

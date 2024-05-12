@@ -98,10 +98,18 @@ struct error_reporter {
         struct zero_address_access *zero_address_access_errors;
 };
 
+bool is_undefined_memory_use_blacklisted(struct error_reporter *reporter);
+bool is_undefined_local_use_blacklisted(struct error_reporter *reporter);
+bool is_use_after_free_blacklisted(struct error_reporter *reporter);
+bool is_memory_leak_blacklisted(struct error_reporter *reporter);
+bool is_double_free_blacklisted(struct error_reporter *reporter);
+bool is_invalid_free_blacklisted(struct error_reporter *reporter);
+bool is_invalid_read_blacklisted(struct error_reporter *reporter);
+bool is_invalid_write_blacklisted(struct error_reporter *reporter);
+
 void add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, bool *validity);
 void add_undefined_local_use(struct error_reporter *reporter, size_t idx);
 void add_use_after_free(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes);
-
 void add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, char *function_name);
 void add_double_free(struct error_reporter *reporter, size_t address);
 void add_invalid_free(struct error_reporter *reporter, size_t address);
