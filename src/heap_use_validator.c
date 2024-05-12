@@ -82,8 +82,8 @@ check_use_after_free(struct heap_use_validator *validator, size_t address, uint8
 static bool
 is_read_write_valid(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
-        if (validator->shadow_stack_validator->shadow_stack_pointer - RED_ZONE_SIZE <= address &&
-            address + size_in_bytes <= validator->shadow_stack_validator->shadow_stack_pointer_base) {
+        if (validator->linear_stack_validator->linear_stack_pointer - RED_ZONE_SIZE <= address &&
+            address + size_in_bytes <= validator->linear_stack_validator->linear_stack_pointer_base) {
                 return true;
         }
 
@@ -122,7 +122,7 @@ check_write_validity(struct heap_use_validator *validator, size_t address, uint8
 }
 
 void
-heap_use_validator_init(struct heap_use_validator *validator, struct shadow_stack_validator *shadow_stack_validator,
+heap_use_validator_init(struct heap_use_validator *validator, struct linear_stack_validator *linear_stack_validator,
                         struct error_reporter *reporter)
 {
         validator->blocks_size = 0;
@@ -131,7 +131,7 @@ heap_use_validator_init(struct heap_use_validator *validator, struct shadow_stac
         validator->global_blocks_size = 0;
         validator->global_blocks = NULL;
 
-        validator->shadow_stack_validator = shadow_stack_validator;
+        validator->linear_stack_validator = linear_stack_validator;
         validator->reporter = reporter;
 }
 

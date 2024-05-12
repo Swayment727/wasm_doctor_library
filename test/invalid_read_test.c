@@ -34,7 +34,7 @@ test_no_invalid_read(void)
 }
 
 void
-test_no_invalid_read_shadow_stack(void)
+test_no_invalid_read_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -46,8 +46,8 @@ test_no_invalid_read_shadow_stack(void)
         size_t address = 164;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_load(address - 4, bytes);
 
@@ -58,7 +58,7 @@ test_no_invalid_read_shadow_stack(void)
 
         assert(doctor.reporter.invalid_read_errors_size == 0);
 
-        doctor_move_shadow_stack_pointer(address);
+        doctor_move_linear_stack_pointer(address);
 
         doctor_store(address - 4 - RED_ZONE_SIZE, bytes);
         doctor_load(address - 4 - RED_ZONE_SIZE, bytes);
@@ -70,7 +70,7 @@ test_no_invalid_read_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] no invalid read shadow stack test\n");
+        printf("[OK] no invalid read linear stack test\n");
 }
 
 void
@@ -104,7 +104,7 @@ test_invalid_read(void)
 }
 
 void
-test_invalid_read_shadow_stack(void)
+test_invalid_read_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -116,8 +116,8 @@ test_invalid_read_shadow_stack(void)
         size_t address = 164;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_load(address - 2, bytes);
 
@@ -138,11 +138,11 @@ test_invalid_read_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] invalid read shadow stack test\n");
+        printf("[OK] invalid read linear stack test\n");
 }
 
 void
-test_invalid_read_bounds_shadow_stack(void)
+test_invalid_read_bounds_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -154,8 +154,8 @@ test_invalid_read_bounds_shadow_stack(void)
         size_t address = 164;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_load(address - 4, bytes);
 
@@ -174,7 +174,7 @@ test_invalid_read_bounds_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] invalid read bounds shadow stack test\n");
+        printf("[OK] invalid read bounds linear stack test\n");
 }
 
 void
@@ -252,9 +252,9 @@ run_invalid_read_test(void)
 {
         test_no_invalid_read();
         test_invalid_read();
-        test_no_invalid_read_shadow_stack();
-        test_invalid_read_shadow_stack();
-        test_invalid_read_bounds_shadow_stack();
+        test_no_invalid_read_linear_stack();
+        test_invalid_read_linear_stack();
+        test_invalid_read_bounds_linear_stack();
         test_invalid_read_bounds_global_data();
         test_invalid_read_bounds_malloc();
 }

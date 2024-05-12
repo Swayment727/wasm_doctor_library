@@ -3,9 +3,9 @@
 
 #include "error_reporter.h"
 #include "heap_use_validator.h"
+#include "linear_stack_validator.h"
 #include "local_validator.h"
 #include "mem_addr_validator.h"
-#include "shadow_stack_validator.h"
 #include "wasm_doctor.h"
 #include "wasm_state.h"
 
@@ -16,30 +16,30 @@
 struct wasm_doctor *doctor;
 
 /**
- * Set the shadow stack pointer base to position defined in WebAssembly module.
- * This function is Clang/LLVM shadow stack pointer specific.
+ * Set the linear stack pointer base to position defined in WebAssembly module.
+ * This function is Clang/LLVM linear stack pointer specific.
  * It is meant to be used with the $__stack_pointer global in WebAssembly.
  *
- * @param[in] address Address of the shadow stack pointer base.
+ * @param[in] address Address of the linear stack pointer base.
  */
 void
-doctor_set_shadow_stack_pointer_base(size_t address)
+doctor_set_linear_stack_pointer_base(size_t address)
 {
-        set_shadow_stack_pointer_base(&doctor->shadow_stack_validator, address);
+        set_linear_stack_pointer_base(&doctor->linear_stack_validator, address);
 }
 
 /**
- * Move the shadow stack pointer to its new position.
- * If the stack size decreases invalidate values in the region that is no longer part of the shadow stack.
- * This function is Clang/LLVM shadow stack pointer specific.
+ * Move the linear stack pointer to its new position.
+ * If the stack size decreases invalidate values in the region that is no longer part of the linear stack.
+ * This function is Clang/LLVM linear stack pointer specific.
  * It is meant to be used with the $__stack_pointer global in WebAssembly.
  *
- * @param[in] address New address of the shadow stack pointer.
+ * @param[in] address New address of the linear stack pointer.
  */
 void
-doctor_move_shadow_stack_pointer(size_t address)
+doctor_move_linear_stack_pointer(size_t address)
 {
-        move_shadow_stack_pointer(&doctor->shadow_stack_validator, &doctor->mem_validator, address);
+        move_linear_stack_pointer(&doctor->linear_stack_validator, &doctor->mem_validator, address);
 }
 
 /**
@@ -147,9 +147,9 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report
         wasm_state_init(&doctor->state);
         reporter_init(&doctor->reporter, &doctor->state, report);
         local_validator_init(&doctor->local_validator, &doctor->reporter);
-        heap_use_validator_init(&doctor->heap_validator, &doctor->shadow_stack_validator, &doctor->reporter);
+        heap_use_validator_init(&doctor->heap_validator, &doctor->linear_stack_validator, &doctor->reporter);
         mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages, &doctor->reporter);
-        shadow_stack_validator_init(&doctor->shadow_stack_validator);
+        linear_stack_validator_init(&doctor->linear_stack_validator);
         zero_address_access_validator_init(&doctor->zero_validator, &doctor->reporter);
 }
 

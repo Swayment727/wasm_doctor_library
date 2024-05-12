@@ -33,7 +33,7 @@ test_no_invalid_write(void)
 }
 
 void
-test_no_invalid_write_shadow_stack(void)
+test_no_invalid_write_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -45,8 +45,8 @@ test_no_invalid_write_shadow_stack(void)
         size_t address = 564;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_store(address - 4, bytes);
 
@@ -57,7 +57,7 @@ test_no_invalid_write_shadow_stack(void)
 
         assert(doctor.reporter.invalid_write_errors_size == 0);
 
-        doctor_move_shadow_stack_pointer(address);
+        doctor_move_linear_stack_pointer(address);
 
         doctor_store(address - 4 - RED_ZONE_SIZE, bytes);
         doctor_load(address - 4 - RED_ZONE_SIZE, bytes);
@@ -69,7 +69,7 @@ test_no_invalid_write_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] no invalid write shadow stack test\n");
+        printf("[OK] no invalid write linear stack test\n");
 }
 
 void
@@ -107,7 +107,7 @@ test_invalid_write(void)
 }
 
 void
-test_invalid_write_shadow_stack(void)
+test_invalid_write_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -119,8 +119,8 @@ test_invalid_write_shadow_stack(void)
         size_t address = 164;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_store(address - 2, bytes);
 
@@ -141,11 +141,11 @@ test_invalid_write_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] invalid write shadow stack test\n");
+        printf("[OK] invalid write linear stack test\n");
 }
 
 void
-test_invalid_write_bounds_shadow_stack(void)
+test_invalid_write_bounds_linear_stack(void)
 {
         struct wasm_doctor doctor;
         doctor_init(&doctor, 2, false);
@@ -157,8 +157,8 @@ test_invalid_write_bounds_shadow_stack(void)
         size_t address = 364;
         uint8_t bytes = 4;
 
-        doctor_set_shadow_stack_pointer_base(address);
-        doctor_move_shadow_stack_pointer(address - 4);
+        doctor_set_linear_stack_pointer_base(address);
+        doctor_move_linear_stack_pointer(address - 4);
 
         doctor_store(address - 4, bytes);
 
@@ -177,7 +177,7 @@ test_invalid_write_bounds_shadow_stack(void)
         doctor_exit(false);
         doctor_reporter_exit();
 
-        printf("[OK] no invalid write bounds shadow stack test\n");
+        printf("[OK] no invalid write bounds linear stack test\n");
 }
 
 void
@@ -255,9 +255,9 @@ run_invalid_write_test(void)
 {
         test_no_invalid_write();
         test_invalid_write();
-        test_no_invalid_write_shadow_stack();
-        test_invalid_write_shadow_stack();
-        test_invalid_write_bounds_shadow_stack();
+        test_no_invalid_write_linear_stack();
+        test_invalid_write_linear_stack();
+        test_invalid_write_bounds_linear_stack();
         test_invalid_write_bounds_global_data();
         test_invalid_write_bounds_malloc();
 }

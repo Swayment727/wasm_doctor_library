@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #include "error_reporter.h"
-#include "shadow_stack_validator.h"
+#include "linear_stack_validator.h"
 
 struct global_block {
         size_t block_start;
@@ -22,7 +22,7 @@ struct allocated_block {
 struct heap_use_validator {
         struct error_reporter *reporter;
         size_t global_blocks_size;
-        struct shadow_stack_validator *shadow_stack_validator;
+        struct linear_stack_validator *linear_stack_validator;
         struct global_block *global_blocks;
         size_t blocks_size;
         struct allocated_block *blocks;
@@ -35,7 +35,7 @@ void check_use_after_free(struct heap_use_validator *validator, size_t address, 
 void check_read_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes);
 void check_write_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes);
 void heap_use_validator_init(struct heap_use_validator *validator,
-                             struct shadow_stack_validator *shadow_stack_validator, struct error_reporter *reporter);
+                             struct linear_stack_validator *linear_stack_validator, struct error_reporter *reporter);
 void heap_use_validator_exit(struct heap_use_validator *validator);
 
 #endif /* HEAP_USE_VALIDATOR */
