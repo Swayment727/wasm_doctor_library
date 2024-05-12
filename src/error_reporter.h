@@ -6,64 +6,48 @@
 
 #include "wasm_state.h"
 
-/**
- * Can potentially be extended in the future with line number through the use of DWARF information or with stack trace.
- */
-struct error_location {
-        char *function_name;
-};
-
 struct undefined_memory_use {
         size_t address;
         size_t size;
         bool *validity;
-        struct error_location location;
 };
 
 struct undefined_local_use {
         size_t idx;
         size_t size;
-        struct error_location location;
 };
 
 struct use_after_free {
         size_t address;
         size_t size;
-        struct error_location location;
 };
 
 struct memory_leak {
         size_t address;
         size_t size;
-        struct error_location location;
 };
 
 struct double_free {
         size_t address;
-        struct error_location location;
 };
 
 struct invalid_free {
         size_t address;
-        struct error_location location;
 };
 
 struct invalid_read {
         size_t address;
         size_t size;
-        struct error_location location;
 };
 
 struct invalid_write {
         size_t address;
         size_t size;
-        struct error_location location;
 };
 
 struct zero_address_access {
         size_t address;
         size_t size;
-        struct error_location location;
 };
 
 struct error_reporter {
@@ -107,14 +91,14 @@ bool is_invalid_free_blacklisted(struct error_reporter *reporter);
 bool is_invalid_read_blacklisted(struct error_reporter *reporter);
 bool is_invalid_write_blacklisted(struct error_reporter *reporter);
 
-void add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, bool *validity);
+void add_undefined_memory_use(struct error_reporter *reporter, size_t address, bool *validity);
 void add_undefined_local_use(struct error_reporter *reporter, size_t idx);
-void add_use_after_free(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes);
+void add_use_after_free(struct error_reporter *reporter, size_t address);
 void add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, char *function_name);
 void add_double_free(struct error_reporter *reporter, size_t address);
 void add_invalid_free(struct error_reporter *reporter, size_t address);
-void add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes);
-void add_invalid_write(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes);
+void add_invalid_read(struct error_reporter *reporter, size_t address);
+void add_invalid_write(struct error_reporter *reporter, size_t address);
 void add_zero_address_access(struct error_reporter *reporter);
 void reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report);
 void reporter_exit(struct error_reporter *reporter);

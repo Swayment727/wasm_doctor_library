@@ -22,15 +22,6 @@ invalidate(struct shadow_memory_validator *validator, uint64_t bit_idx)
 }
 
 void
-check_access(struct shadow_memory_validator *validator, uint64_t bit_idx)
-{
-        if ((validator->words[bit_idx / BYTES_PER_WORD] & (1 << bit_idx % BYTES_PER_WORD)) == 0) {
-                bool validity[1] = {false};
-                add_undefined_memory_use(validator->reporter, bit_idx, 1, validity);
-        }
-}
-
-void
 validate_region(struct shadow_memory_validator *validator, size_t address, size_t size_in_bytes)
 {
         for (size_t i = address * 8; i < (address + size_in_bytes) * 8 - 1; ++i) {
@@ -63,8 +54,7 @@ check_region_access(struct shadow_memory_validator *validator, size_t address, s
         }
 
         if (!is_valid) {
-                add_undefined_memory_use(validator->reporter, address, validator->reporter->state->size_in_bytes,
-                                         validity);
+                add_undefined_memory_use(validator->reporter, address, validity);
         }
 }
 

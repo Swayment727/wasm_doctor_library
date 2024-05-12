@@ -16,7 +16,6 @@ struct shadow_memory_validator {
 
 void validate(struct shadow_memory_validator *validator, uint64_t bit_idx);
 void invalidate(struct shadow_memory_validator *validator, uint64_t bit_idx);
-void check_access(struct shadow_memory_validator *validator, uint64_t bit_idx);
 void validate_region(struct shadow_memory_validator *validator, size_t address, size_t size_in_bytes);
 void invalidate_region(struct shadow_memory_validator *validator, size_t address, size_t size_in_bytes);
 void check_region_access(struct shadow_memory_validator *validator, size_t bit_idx_start, size_t size_in_bytes);

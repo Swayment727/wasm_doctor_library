@@ -6,13 +6,6 @@
 #include "error_reporter.h"
 #include "wasm_state.h"
 
-#define SET_FUNCTION_NAME(errors, errors_size, function_name)                                                          \
-        {                                                                                                              \
-                (*errors)[*errors_size - 1].location.function_name = (char *)malloc(strnlen(function_name, 50) + 1);   \
-                strncpy((*errors)[*errors_size - 1].location.function_name, function_name,                             \
-                        strnlen(function_name, 50) + 1);                                                               \
-        }
-
 static bool
 is_dlmalloc(char *function_name)
 {
@@ -204,20 +197,17 @@ print_stack_trace(struct error_reporter *reporter)
 }
 
 void
-add_undefined_memory_use(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, bool *validity)
+add_undefined_memory_use(struct error_reporter *reporter, size_t address, bool *validity)
 {
         struct undefined_memory_use **errors = &reporter->undefined_memory_use_errors;
         size_t *errors_size = &reporter->undefined_memory_use_errors_size;
 
         *errors = (struct undefined_memory_use *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
-        (*errors)[*errors_size - 1].size = size_in_bytes;
+        (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
         (*errors)[*errors_size - 1].validity =
-                malloc(size_in_bytes * 8 * sizeof(*((*errors)[*errors_size - 1].validity)));
-        memcpy((*errors)[*errors_size - 1].validity, validity, size_in_bytes * 8);
-
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
+                malloc(reporter->state->size_in_bytes * 8 * sizeof(*((*errors)[*errors_size - 1].validity)));
+        memcpy((*errors)[*errors_size - 1].validity, validity, reporter->state->size_in_bytes * 8);
 
         if (reporter->report && !is_undefined_memory_use_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Undefined value of size %zu bytes read from address "
@@ -243,9 +233,6 @@ add_undefined_local_use(struct error_reporter *reporter, size_t idx)
         *errors = (struct undefined_local_use *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].idx = idx;
 
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
-
         if (reporter->report && !is_undefined_local_use_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Undefined local with index %zu read.\n", (*errors)[*errors_size - 1].idx);
                 print_stack_trace(reporter);
@@ -253,17 +240,14 @@ add_undefined_local_use(struct error_reporter *reporter, size_t idx)
 }
 
 void
-add_use_after_free(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes)
+add_use_after_free(struct error_reporter *reporter, size_t address)
 {
         struct use_after_free **errors = &reporter->use_after_free_errors;
         size_t *errors_size = &reporter->use_after_free_errors_size;
 
         *errors = (struct use_after_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
-        (*errors)[*errors_size - 1].size = size_in_bytes;
-
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
+        (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
         if (reporter->report && !is_use_after_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Use after free of size %zu bytes detected at address "
@@ -283,8 +267,6 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
-        SET_FUNCTION_NAME(errors, errors_size, function_name) // TODO: check macro
-
         if (reporter->report && !is_memory_leak_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
@@ -302,9 +284,6 @@ add_double_free(struct error_reporter *reporter, size_t address)
         *errors = (struct double_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
-
         if (reporter->report && !is_double_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Double free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
@@ -321,9 +300,6 @@ add_invalid_free(struct error_reporter *reporter, size_t address)
         *errors = (struct invalid_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name);
-
         if (reporter->report && !is_invalid_free_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
@@ -332,17 +308,14 @@ add_invalid_free(struct error_reporter *reporter, size_t address)
 }
 
 void
-add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes)
+add_invalid_read(struct error_reporter *reporter, size_t address)
 {
         struct invalid_read **errors = &reporter->invalid_read_errors;
         size_t *errors_size = &reporter->invalid_read_errors_size;
 
         *errors = (struct invalid_read *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
-        (*errors)[*errors_size - 1].size = size_in_bytes;
-
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
+        (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
         if (reporter->report && !is_invalid_read_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid read of size %zu bytes detected at address %zu.\n",
@@ -352,17 +325,14 @@ add_invalid_read(struct error_reporter *reporter, size_t address, uint8_t size_i
 }
 
 void
-add_invalid_write(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes)
+add_invalid_write(struct error_reporter *reporter, size_t address)
 {
         struct invalid_write **errors = &reporter->invalid_write_errors;
         size_t *errors_size = &reporter->invalid_write_errors_size;
 
         *errors = (struct invalid_write *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
-        (*errors)[*errors_size - 1].size = size_in_bytes;
-
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
+        (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
         if (reporter->report && !is_invalid_write_blacklisted(reporter)) {
                 printf("==Wasm Doctor== Invalid write of size %zu bytes detected at address %zu.\n",
@@ -378,9 +348,6 @@ add_zero_address_access(struct error_reporter *reporter)
         size_t *errors_size = &reporter->zero_address_access_errors_size;
 
         *errors = (struct zero_address_access *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
-
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        SET_FUNCTION_NAME(errors, errors_size, function_name)
 
         if (reporter->report) {
                 printf("==Wasm Doctor== Address zero access detected.\n");
@@ -427,40 +394,7 @@ void
 reporter_exit(struct error_reporter *reporter)
 {
         for (size_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
-                free(reporter->undefined_memory_use_errors[i].location.function_name);
                 free(reporter->undefined_memory_use_errors[i].validity);
-        }
-
-        for (size_t i = 0; i < reporter->undefined_local_use_errors_size; ++i) {
-                free(reporter->undefined_local_use_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->use_after_free_errors_size; ++i) {
-                free(reporter->use_after_free_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->memory_leak_errors_size; ++i) {
-                free(reporter->memory_leak_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->double_free_errors_size; ++i) {
-                free(reporter->double_free_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->invalid_free_errors_size; ++i) {
-                free(reporter->invalid_free_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->invalid_read_errors_size; ++i) {
-                free(reporter->invalid_read_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->invalid_write_errors_size; ++i) {
-                free(reporter->invalid_write_errors[i].location.function_name);
-        }
-
-        for (size_t i = 0; i < reporter->zero_address_access_errors_size; ++i) {
-                free(reporter->zero_address_access_errors[i].location.function_name);
         }
 
         free(reporter->undefined_memory_use_errors);

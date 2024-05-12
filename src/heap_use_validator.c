@@ -75,7 +75,7 @@ check_use_after_free(struct heap_use_validator *validator, size_t address, uint8
         }
 
         if (found_on_heap && !found_allocated) {
-                add_use_after_free(validator->reporter, address, size_in_bytes);
+                add_use_after_free(validator->reporter, address);
         }
 }
 
@@ -109,7 +109,7 @@ void
 check_read_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
-                add_invalid_read(validator->reporter, address, size_in_bytes);
+                add_invalid_read(validator->reporter, address);
         }
 }
 
@@ -117,7 +117,7 @@ void
 check_write_validity(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
         if (!is_read_write_valid(validator, address, size_in_bytes)) {
-                add_invalid_write(validator->reporter, address, size_in_bytes);
+                add_invalid_write(validator->reporter, address);
         }
 }
 
