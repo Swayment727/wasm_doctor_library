@@ -5,7 +5,7 @@
 #include "heap_use_validator.h"
 #include "linear_stack_validator.h"
 #include "local_validator.h"
-#include "mem_addr_validator.h"
+#include "shadow_memory_validator.h"
 #include "wasm_doctor.h"
 #include "wasm_state.h"
 
@@ -39,7 +39,7 @@ doctor_set_linear_stack_pointer_base(size_t address)
 void
 doctor_move_linear_stack_pointer(size_t address)
 {
-        move_linear_stack_pointer(&doctor->linear_stack_validator, &doctor->mem_validator, address);
+        move_linear_stack_pointer(&doctor->linear_stack_validator, &doctor->shadow_memory_validator, address);
 }
 
 /**
@@ -49,7 +49,7 @@ doctor_move_linear_stack_pointer(size_t address)
 void
 doctor_global_data_validate(size_t address, size_t size_in_bytes)
 {
-        validate_region(&doctor->mem_validator, address, size_in_bytes);
+        validate_region(&doctor->shadow_memory_validator, address, size_in_bytes);
         register_global_data(&doctor->heap_validator, address, size_in_bytes);
 }
 
@@ -63,7 +63,7 @@ doctor_store(size_t address, uint8_t size_in_bytes)
         set_byte_size(doctor->reporter.state, size_in_bytes);
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
         check_write_validity(&doctor->heap_validator, address, size_in_bytes);
-        validate_region(&doctor->mem_validator, address, size_in_bytes);
+        validate_region(&doctor->shadow_memory_validator, address, size_in_bytes);
         check_zero_address(&doctor->zero_validator, address);
 }
 
@@ -77,7 +77,7 @@ doctor_load(size_t address, uint8_t size_in_bytes)
         set_byte_size(doctor->reporter.state, size_in_bytes);
         check_use_after_free(&doctor->heap_validator, address, size_in_bytes);
         check_read_validity(&doctor->heap_validator, address, size_in_bytes);
-        check_region_access(&doctor->mem_validator, address, size_in_bytes);
+        check_region_access(&doctor->shadow_memory_validator, address, size_in_bytes);
         check_zero_address(&doctor->zero_validator, address);
 }
 
@@ -148,7 +148,8 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report
         reporter_init(&doctor->reporter, &doctor->state, report);
         local_validator_init(&doctor->local_validator, &doctor->reporter);
         heap_use_validator_init(&doctor->heap_validator, &doctor->linear_stack_validator, &doctor->reporter);
-        mem_addr_validator_init(&doctor->mem_validator, WASM_PAGE_SIZE * size_in_pages, &doctor->reporter);
+        shadow_memory_validator_init(&doctor->shadow_memory_validator, WASM_PAGE_SIZE * size_in_pages,
+                                     &doctor->reporter);
         linear_stack_validator_init(&doctor->linear_stack_validator);
         zero_address_access_validator_init(&doctor->zero_validator, &doctor->reporter);
 }
@@ -170,7 +171,7 @@ doctor_reporter_exit(void)
 void
 doctor_exit(bool exit_reporter)
 {
-        mem_addr_validator_exit(&doctor->mem_validator);
+        shadow_memory_validator_exit(&doctor->shadow_memory_validator);
         heap_use_validator_exit(&doctor->heap_validator);
         local_validator_exit(&doctor->local_validator);
 

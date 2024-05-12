@@ -8,7 +8,7 @@
 #include "heap_use_validator.h"
 #include "linear_stack_validator.h"
 #include "local_validator.h"
-#include "mem_addr_validator.h"
+#include "shadow_memory_validator.h"
 #include "wasm_state.h"
 #include "zero_address_access_validator.h"
 
@@ -17,7 +17,7 @@ struct wasm_doctor {
         struct wasm_state state;
 
         struct linear_stack_validator linear_stack_validator;
-        struct mem_addr_validator mem_validator;
+        struct shadow_memory_validator shadow_memory_validator;
         struct heap_use_validator heap_validator;
         struct local_validator local_validator;
         struct zero_address_access_validator zero_validator;
