@@ -472,4 +472,6 @@ reporter_exit(struct error_reporter *reporter)
         free(reporter->invalid_read_errors);
         free(reporter->invalid_write_errors);
         free(reporter->zero_address_access_errors);
+
+        wasm_state_exit(reporter->state);
 }
