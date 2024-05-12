@@ -6,6 +6,10 @@
 #include "error_reporter.h"
 #include "heap_use_validator.h"
 
+// red zone explained in WebAssembly C ABI
+// https://github.com/WebAssembly/tool-conventions/blob/main/BasicCABI.md#the-linear-stack
+#define RED_ZONE_SIZE 128
+
 void
 register_global_data(struct heap_use_validator *validator, size_t address, size_t size_in_bytes)
 {
@@ -78,7 +82,7 @@ check_use_after_free(struct heap_use_validator *validator, size_t address, uint8
 static bool
 is_read_write_valid(struct heap_use_validator *validator, size_t address, uint8_t size_in_bytes)
 {
-        if (validator->shadow_stack_validator->shadow_stack_pointer <= address &&
+        if (validator->shadow_stack_validator->shadow_stack_pointer - RED_ZONE_SIZE <= address &&
             address + size_in_bytes <= validator->shadow_stack_validator->shadow_stack_pointer_base) {
                 return true;
         }
