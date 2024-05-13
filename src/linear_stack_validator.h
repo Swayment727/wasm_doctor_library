@@ -9,14 +9,12 @@
 // https://github.com/WebAssembly/tool-conventions/blob/main/BasicCABI.md#the-linear-stack
 #define RED_ZONE_SIZE 128
 
+/**
+ * Linear stack validator is responsible for maintenance of the state of C ABI linear stack in WebAssembly linear
+ * memory and the invalidation of its regions as they are being deallocated.
+ */
 struct linear_stack_validator {
         size_t linear_stack_pointer_base;
-
-        /**
-         * Linear stack pointer is initially set to the highest address. Because of
-         * this the first call of move_linear_stack_pointer function sets it to the
-         * actual start of the linear stack.
-         */
         size_t linear_stack_pointer;
 };
 

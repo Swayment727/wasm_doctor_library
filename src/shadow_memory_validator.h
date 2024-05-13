@@ -9,6 +9,10 @@
 
 typedef uint32_t word_t;
 
+/**
+ * Shadow memory validator maintains state of shadow memory corresponding to the current state of WebAssembly linear
+ * memory. It is able to check whether the region being read is valid and if it is not report it.
+ */
 struct shadow_memory_validator {
         struct error_reporter *reporter;
         word_t *words;

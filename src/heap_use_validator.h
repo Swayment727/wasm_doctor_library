@@ -19,6 +19,10 @@ struct allocated_block {
         char *allocated_in_function_name;
 };
 
+/**
+ * Heap use validator is responsible for checking the correct use of malloc (realloc, calloc, etc.) and free, double
+ * free, invalid free, and invalid read and write detection.
+ */
 struct heap_use_validator {
         struct error_reporter *reporter;
         size_t global_blocks_size;
