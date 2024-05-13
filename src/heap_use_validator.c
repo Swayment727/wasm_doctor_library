@@ -5,10 +5,7 @@
 
 #include "error_reporter.h"
 #include "heap_use_validator.h"
-
-// red zone explained in WebAssembly C ABI
-// https://github.com/WebAssembly/tool-conventions/blob/main/BasicCABI.md#the-linear-stack
-#define RED_ZONE_SIZE 128
+#include "linear_stack_validator.h"
 
 void
 register_global_data(struct heap_use_validator *validator, size_t address, size_t size_in_bytes)

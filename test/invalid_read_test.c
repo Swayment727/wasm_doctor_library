@@ -1,9 +1,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "linear_stack_validator.h"
 #include "wasm_doctor.h"
-
-#define RED_ZONE_SIZE 128
 
 void
 test_no_invalid_read(void)

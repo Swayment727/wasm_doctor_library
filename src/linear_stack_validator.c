@@ -17,8 +17,8 @@ move_linear_stack_pointer(struct linear_stack_validator *validator,
         }
 
         if (address > validator->linear_stack_pointer) {
-                invalidate_region(shadow_memory_validator, validator->linear_stack_pointer,
-                                  address - validator->linear_stack_pointer);
+                invalidate_region(shadow_memory_validator, validator->linear_stack_pointer - RED_ZONE_SIZE,
+                                  address - validator->linear_stack_pointer + RED_ZONE_SIZE);
         }
 
         validator->linear_stack_pointer = address;

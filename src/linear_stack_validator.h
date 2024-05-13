@@ -5,6 +5,10 @@
 
 #include "shadow_memory_validator.h"
 
+// red zone explained in WebAssembly C ABI
+// https://github.com/WebAssembly/tool-conventions/blob/main/BasicCABI.md#the-linear-stack
+#define RED_ZONE_SIZE 128
+
 struct linear_stack_validator {
         size_t linear_stack_pointer_base;
 
