@@ -149,9 +149,8 @@ is_use_after_free_blacklisted(struct error_reporter *reporter)
 }
 
 bool
-is_memory_leak_blacklisted(struct error_reporter *reporter)
+is_memory_leak_blacklisted(char *function_name)
 {
-        char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         return is_blacklisted(function_name);
 }
 
@@ -267,7 +266,7 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
-        if (reporter->report && !is_memory_leak_blacklisted(reporter)) {
+        if (reporter->report && !is_memory_leak_blacklisted(function_name)) {
                 printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);

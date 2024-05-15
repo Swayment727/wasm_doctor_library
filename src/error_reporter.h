@@ -85,7 +85,7 @@ struct error_reporter {
 bool is_undefined_memory_use_blacklisted(struct error_reporter *reporter);
 bool is_undefined_local_use_blacklisted(struct error_reporter *reporter);
 bool is_use_after_free_blacklisted(struct error_reporter *reporter);
-bool is_memory_leak_blacklisted(struct error_reporter *reporter);
+bool is_memory_leak_blacklisted(char *function_name);
 bool is_double_free_blacklisted(struct error_reporter *reporter);
 bool is_invalid_free_blacklisted(struct error_reporter *reporter);
 bool is_invalid_read_blacklisted(struct error_reporter *reporter);
