@@ -107,6 +107,16 @@ is_lseek(char *function_name)
 }
 
 static bool
+is_memcpy(char *function_name)
+{
+        if (!strcmp(function_name, "memcpy")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
 is_result_of_fwritex(struct error_reporter *reporter)
 {
         for (size_t i = 1; i <= reporter->state->function_names_size; i++) {
@@ -131,7 +141,7 @@ is_undefined_memory_use_blacklisted(struct error_reporter *reporter)
 {
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         return is_blacklisted(function_name) || is_read(function_name) || is_stdio_read(function_name) ||
-               is_vfscanf(function_name);
+               is_vfscanf(function_name) || is_result_of_fwritex(reporter) || is_memcpy(function_name);
 }
 
 bool
