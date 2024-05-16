@@ -27,6 +27,16 @@ is_dlfree(char *function_name)
 }
 
 static bool
+is_realloc(char *function_name)
+{
+        if (!strcmp(function_name, "realloc")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
 is_start(char *function_name)
 {
         if (!strcmp(function_name, "_start")) {
@@ -182,14 +192,16 @@ bool
 is_invalid_read_blacklisted(struct error_reporter *reporter)
 {
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        return is_blacklisted(function_name) || is_stdio_read(function_name) || is_vfscanf(function_name);
+        return is_blacklisted(function_name) || is_stdio_read(function_name) || is_vfscanf(function_name) ||
+               is_realloc(function_name);
 }
 
 bool
 is_invalid_write_blacklisted(struct error_reporter *reporter)
 {
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
-        return is_blacklisted(function_name) || is_result_of_fwritex(reporter) || is_lseek(function_name);
+        return is_blacklisted(function_name) || is_result_of_fwritex(reporter) || is_lseek(function_name) ||
+               is_realloc(function_name);
 }
 
 static void
