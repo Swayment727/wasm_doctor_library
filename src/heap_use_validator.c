@@ -39,16 +39,21 @@ register_malloc(struct heap_use_validator *validator, size_t block_start, size_t
 void
 register_free(struct heap_use_validator *validator, size_t block_start)
 {
+        bool found_free = false;
         for (size_t i = 0; i < validator->blocks_size; ++i) {
                 if (validator->blocks[i].block_start == block_start) {
                         if (validator->blocks[i].freed == false) {
                                 validator->blocks[i].freed = true;
                                 return;
                         } else {
-                                add_double_free(validator->reporter, block_start);
-                                return;
+                                found_free = true;
                         }
                 }
+        }
+
+        if (found_free) {
+                add_double_free(validator->reporter, block_start);
+                return;
         }
 
         add_invalid_free(validator->reporter, block_start);
