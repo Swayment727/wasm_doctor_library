@@ -1,0 +1,3 @@
+* Wasm Doctor Library
+
+Wasm Doctor Library was created as a part of my bachelor's thesis at [[https://fit.cvut.cz/en][FIT CTU]]. It is currently used in [[https://github.com/slashjakub/wasm_doctor][Wasm Doctor]], a memory debugger for C programs compiled to WebAssembly.
