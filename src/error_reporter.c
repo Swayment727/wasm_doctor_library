@@ -140,6 +140,52 @@ is_result_of_fwritex(struct error_reporter *reporter)
 }
 
 static bool
+is_toread(char *function_name)
+{
+        if (!strcmp(function_name, "__toread")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
+is_result_of_fgets(struct error_reporter *reporter)
+{
+        for (size_t i = 1; i <= reporter->state->function_names_size; i++) {
+                char *function_name = reporter->state->function_names[reporter->state->function_names_size - i];
+                if (!strcmp(function_name, "fgets")) {
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+static bool
+is_result_of_uflow(struct error_reporter *reporter)
+{
+        for (size_t i = 1; i <= reporter->state->function_names_size; i++) {
+                char *function_name = reporter->state->function_names[reporter->state->function_names_size - i];
+                if (!strcmp(function_name, "__uflow")) {
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+static bool
+is_intscan(char *function_name)
+{
+        if (!strcmp(function_name, "__intscan")) {
+                return true;
+        }
+
+        return false;
+}
+
+static bool
 is_blacklisted(char *function_name)
 {
         return is_dlmalloc(function_name) || is_dlfree(function_name) || is_start(function_name) ||
@@ -151,7 +197,9 @@ is_undefined_memory_use_blacklisted(struct error_reporter *reporter)
 {
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         return is_blacklisted(function_name) || is_read(function_name) || is_stdio_read(function_name) ||
-               is_vfscanf(function_name) || is_result_of_fwritex(reporter) || is_memcpy(function_name);
+               is_vfscanf(function_name) || is_result_of_fwritex(reporter) || is_memcpy(function_name) ||
+               is_toread(function_name) || is_result_of_fgets(reporter) || is_result_of_uflow(reporter) ||
+               is_intscan(function_name);
 }
 
 bool
@@ -193,7 +241,8 @@ is_invalid_read_blacklisted(struct error_reporter *reporter)
 {
         char *function_name = reporter->state->function_names[reporter->state->function_names_size - 1];
         return is_blacklisted(function_name) || is_stdio_read(function_name) || is_vfscanf(function_name) ||
-               is_realloc(function_name);
+               is_realloc(function_name) || is_toread(function_name) || is_result_of_fgets(reporter) ||
+               is_intscan(function_name);
 }
 
 bool
@@ -292,7 +341,8 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
                 printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
-                print_stack_trace(reporter);
+                printf("==Wasm Doctor== Allocated in %s.\n", function_name);
+                printf("==Wasm Doctor== \n");
         }
 }
 
