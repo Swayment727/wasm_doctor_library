@@ -341,7 +341,8 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
                 printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
-                print_stack_trace(reporter);
+                printf("==Wasm Doctor== Allocated in %s.\n", function_name);
+                printf("==Wasm Doctor== \n");
         }
 }
 
