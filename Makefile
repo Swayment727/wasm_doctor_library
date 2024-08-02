@@ -18,7 +18,7 @@ all: compile test doc
 .PHONY: compile
 compile: $(BUILD_DIR)/$(TARGET).a
 
-$(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/shadow_memory_validator.o $(BUILD_DIR)/heap_use_validator.o $(BUILD_DIR)/local_validator.o $(BUILD_DIR)/error_reporter.o $(BUILD_DIR)/wasm_state.o $(BUILD_DIR)/linear_stack_validator.o $(BUILD_DIR)/zero_address_access_validator.o
+$(BUILD_DIR)/$(TARGET).a: $(BUILD_DIR)/wasm_doctor.o $(BUILD_DIR)/shadow_memory_validator.o $(BUILD_DIR)/heap_use_validator.o $(BUILD_DIR)/local_validator.o $(BUILD_DIR)/error_reporter.o $(BUILD_DIR)/wasm_state.o $(BUILD_DIR)/linear_stack_validator.o $(BUILD_DIR)/zero_address_access_validator.o $(BUILD_DIR)/report_options.o
 	ar rcs $@ $^
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(SOURCE_DIR)/%.h
