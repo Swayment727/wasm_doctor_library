@@ -145,7 +145,7 @@ doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report
 {
         doctor = wasm_doctor;
         wasm_state_init(&doctor->state);
-        reporter_init(&doctor->reporter, &doctor->state, report);
+        reporter_init(&doctor->reporter, &doctor->state);
         local_validator_init(&doctor->local_validator, &doctor->reporter);
         heap_use_validator_init(&doctor->heap_validator, &doctor->linear_stack_validator, &doctor->reporter);
         shadow_memory_validator_init(&doctor->shadow_memory_validator, WASM_PAGE_SIZE * size_in_pages,

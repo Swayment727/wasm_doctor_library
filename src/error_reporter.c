@@ -1,11 +1,30 @@
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "error_reporter.h"
+#include "report_options.h"
 #include "wasm_state.h"
 
+static void
+print_to(struct error_reporter * reporter, const char * str) {
+        if (reporter->report_to_file && reporter->report_file != NULL) {
+                fprintf(reporter->report_file, "%s", str);                         
+        }                                                                    
+        else {
+                printf("%s", str); 
+        }
+}
+
+
+#define printf_to(reporter, str, ...) if (reporter->report_to_file && reporter->report_file != NULL) { \
+                                                fprintf(reporter->report_file, str, __VA_ARGS__);      \
+                                      }                                                                \
+                                      else {                                                           \
+                                                printf(str, __VA_ARGS__);                              \
+                                      }
 static bool
 is_dlmalloc(char *function_name)
 {
@@ -257,18 +276,56 @@ static void
 print_stack_trace(struct error_reporter *reporter)
 {
         if (reporter->state->function_names_size >= 1) {
-                printf("==Wasm Doctor== ");
+                print_to(reporter, "==Wasm Doctor== ");
                 for (size_t i = reporter->state->function_names_size - 1; i > 0; --i) {
-                        printf("%s <- ", reporter->state->function_names[i]);
+                        printf_to(reporter, "%s <- ", reporter->state->function_names[i]);
                 }
-                printf("%s\n", reporter->state->function_names[0]);
-                printf("==Wasm Doctor== \n");
+                printf_to(reporter,"%s\n", reporter->state->function_names[0]);
+                print_to(reporter,"==Wasm Doctor== \n");
         }
+}
+
+static void
+print_type_report(struct error_reporter * reporter) {
+    bool test_failed[] = {
+        reporter->double_free_errors_size != 0, 
+        reporter->memory_leak_errors_size != 0,
+        reporter->invalid_free_errors_size != 0,
+        reporter->invalid_read_errors_size != 0,
+        reporter->invalid_write_errors_size != 0,
+        reporter->use_after_free_errors_size != 0,
+        reporter->zero_address_access_errors_size != 0,
+        reporter->undefined_memory_use_errors_size != 0,
+        reporter->undefined_local_use_errors_size != 0,
+    };
+    const char * test_names[] = {
+        "Double free",
+        "Memory leak",
+        "Invalid free",
+        "Invalid read",
+        "Invalid write",
+        "Use after free",
+        "Null pointer access",
+        "Undefined memory use",
+        "Undefined local use",
+    };
+    for (int i = 0; i < sizeof(test_failed); i++) {
+        if (test_failed[i]){
+            printf_to(reporter,"==Wasm Doctor== Test: %s has failed\n", test_names[i]);
+        }
+    }
+}
+
+static void
+print_bool_report(struct error_reporter * reporter) {
+    print_to(reporter, "==Wasm doctor== check has failed\n");
 }
 
 void
 add_undefined_memory_use(struct error_reporter *reporter, size_t address, bool *validity)
 {
+        reporter->found_error = true;
+
         struct undefined_memory_use **errors = &reporter->undefined_memory_use_errors;
         size_t *errors_size = &reporter->undefined_memory_use_errors_size;
 
@@ -279,16 +336,16 @@ add_undefined_memory_use(struct error_reporter *reporter, size_t address, bool *
                 malloc(reporter->state->size_in_bytes * 8 * sizeof(*((*errors)[*errors_size - 1].validity)));
         memcpy((*errors)[*errors_size - 1].validity, validity, reporter->state->size_in_bytes * 8);
 
-        if (reporter->report && !is_undefined_memory_use_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Undefined value of size %zu bytes read from address "
+        if (reporter->report_level == STACKTRACE_REPORT && !is_undefined_memory_use_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Undefined value of size %zu bytes read from address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
 
-                printf("==Wasm Doctor== validity: ");
+                print_to(reporter, "==Wasm Doctor== validity: ");
                 for (size_t j = 0; j < (*errors)[*errors_size - 1].size * 8; ++j) {
-                        printf("%u", (*errors)[*errors_size - 1].validity[j]);
+                        printf_to(reporter, "%u", (*errors)[*errors_size - 1].validity[j]);
                 }
-                printf("\n");
+                print_to(reporter, "\n");
 
                 print_stack_trace(reporter);
         }
@@ -297,14 +354,16 @@ add_undefined_memory_use(struct error_reporter *reporter, size_t address, bool *
 void
 add_undefined_local_use(struct error_reporter *reporter, size_t idx)
 {
+        reporter->found_error = true;
+
         struct undefined_local_use **errors = &reporter->undefined_local_use_errors;
         size_t *errors_size = &reporter->undefined_local_use_errors_size;
 
         *errors = (struct undefined_local_use *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].idx = idx;
 
-        if (reporter->report && !is_undefined_local_use_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Undefined local with index %zu read.\n", (*errors)[*errors_size - 1].idx);
+        if (reporter->report_level == STACKTRACE_REPORT && !is_undefined_local_use_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Undefined local with index %zu read.\n", (*errors)[*errors_size - 1].idx);
                 print_stack_trace(reporter);
         }
 }
@@ -312,6 +371,8 @@ add_undefined_local_use(struct error_reporter *reporter, size_t idx)
 void
 add_use_after_free(struct error_reporter *reporter, size_t address)
 {
+        reporter->found_error = true;
+
         struct use_after_free **errors = &reporter->use_after_free_errors;
         size_t *errors_size = &reporter->use_after_free_errors_size;
 
@@ -319,8 +380,8 @@ add_use_after_free(struct error_reporter *reporter, size_t address)
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
-        if (reporter->report && !is_use_after_free_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Use after free of size %zu bytes detected at address "
+        if (reporter->report_level == STACKTRACE_REPORT && !is_use_after_free_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Use after free of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
@@ -330,6 +391,8 @@ add_use_after_free(struct error_reporter *reporter, size_t address)
 void
 add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in_bytes, char *function_name)
 {
+        reporter->found_error = true;
+
         struct memory_leak **errors = &reporter->memory_leak_errors;
         size_t *errors_size = &reporter->memory_leak_errors_size;
 
@@ -337,26 +400,28 @@ add_memory_leak(struct error_reporter *reporter, size_t address, uint8_t size_in
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = size_in_bytes;
 
-        if (reporter->report && !is_memory_leak_blacklisted(function_name)) {
-                printf("==Wasm Doctor== Memory leak of size %zu bytes detected at address "
+        if (reporter->report_level == STACKTRACE_REPORT && !is_memory_leak_blacklisted(function_name)) {
+                printf_to(reporter, "==Wasm Doctor== Memory leak of size %zu bytes detected at address "
                        "%zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address * 8);
-                printf("==Wasm Doctor== Allocated in %s.\n", function_name);
-                printf("==Wasm Doctor== \n");
+                printf_to(reporter, "==Wasm Doctor== Allocated in %s.\n", function_name);
+                print_to(reporter, "==Wasm Doctor== \n");
         }
 }
 
 void
 add_double_free(struct error_reporter *reporter, size_t address)
 {
+        reporter->found_error = true;
+
         struct double_free **errors = &reporter->double_free_errors;
         size_t *errors_size = &reporter->double_free_errors_size;
 
         *errors = (struct double_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
-        if (reporter->report && !is_double_free_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Double free detected at address %zu.\n",
+        if (reporter->report_level == STACKTRACE_REPORT && !is_double_free_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Double free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
         }
@@ -371,8 +436,8 @@ add_invalid_free(struct error_reporter *reporter, size_t address)
         *errors = (struct invalid_free *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
         (*errors)[*errors_size - 1].address = address;
 
-        if (reporter->report && !is_invalid_free_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Invalid free detected at address %zu.\n",
+        if (reporter->report_level == STACKTRACE_REPORT && !is_invalid_free_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Invalid free detected at address %zu.\n",
                        (*errors)[*errors_size - 1].address * 8);
                 print_stack_trace(reporter);
         }
@@ -388,8 +453,8 @@ add_invalid_read(struct error_reporter *reporter, size_t address)
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
-        if (reporter->report && !is_invalid_read_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Invalid read of size %zu bytes detected at address %zu.\n",
+        if (reporter->report_level == STACKTRACE_REPORT && !is_invalid_read_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Invalid read of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
         }
@@ -398,6 +463,8 @@ add_invalid_read(struct error_reporter *reporter, size_t address)
 void
 add_invalid_write(struct error_reporter *reporter, size_t address)
 {
+        reporter->found_error = true;
+
         struct invalid_write **errors = &reporter->invalid_write_errors;
         size_t *errors_size = &reporter->invalid_write_errors_size;
 
@@ -405,8 +472,8 @@ add_invalid_write(struct error_reporter *reporter, size_t address)
         (*errors)[*errors_size - 1].address = address;
         (*errors)[*errors_size - 1].size = reporter->state->size_in_bytes;
 
-        if (reporter->report && !is_invalid_write_blacklisted(reporter)) {
-                printf("==Wasm Doctor== Invalid write of size %zu bytes detected at address %zu.\n",
+        if (reporter->report_level == STACKTRACE_REPORT && !is_invalid_write_blacklisted(reporter)) {
+                printf_to(reporter, "==Wasm Doctor== Invalid write of size %zu bytes detected at address %zu.\n",
                        (*errors)[*errors_size - 1].size, (*errors)[*errors_size - 1].address);
                 print_stack_trace(reporter);
         }
@@ -415,19 +482,21 @@ add_invalid_write(struct error_reporter *reporter, size_t address)
 void
 add_zero_address_access(struct error_reporter *reporter)
 {
+        reporter->found_error = true;
+
         struct zero_address_access **errors = &reporter->zero_address_access_errors;
         size_t *errors_size = &reporter->zero_address_access_errors_size;
 
         *errors = (struct zero_address_access *)realloc(*errors, ++(*errors_size) * sizeof(**errors));
 
-        if (reporter->report) {
-                printf("==Wasm Doctor== Address zero access detected.\n");
+        if (reporter->report_level == STACKTRACE_REPORT ) {
+                print_to(reporter, "==Wasm Doctor== Address zero access detected.\n");
                 print_stack_trace(reporter);
         }
 }
 
 void
-reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report)
+reporter_init(struct error_reporter *reporter, struct wasm_state *state)
 {
         reporter->undefined_memory_use_errors_size = 0;
         reporter->undefined_memory_use_errors = NULL;
@@ -458,12 +527,30 @@ reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool re
 
         reporter->state = state;
 
-        reporter->report = report;
+        reporter->report_level = get_report_level();
+        reporter->report_to_file = get_report_to_file();
+        
+        if (reporter->report_to_file) {
+                reporter->report_file = fopen("error_log.txt","w");
+                        if (reporter->report_file == NULL) {
+                            fprintf(stderr, "Wasn't able to open file for writing,\
+                                            continuing with console output.");
+                            reporter->report_to_file = false;
+                        }
+        } else {
+            reporter->report_file = NULL;
+        }
 }
 
 void
 reporter_exit(struct error_reporter *reporter)
 {
+        if (reporter->report_level == TYPE_REPORT && reporter->found_error) {
+                print_type_report(reporter); 
+        }
+        else if (reporter->report_level == BOOL_REPORT && reporter->found_error) {
+                print_bool_report(reporter);
+        }
         for (size_t i = 0; i < reporter->undefined_memory_use_errors_size; ++i) {
                 free(reporter->undefined_memory_use_errors[i].validity);
         }
@@ -477,6 +564,10 @@ reporter_exit(struct error_reporter *reporter)
         free(reporter->invalid_read_errors);
         free(reporter->invalid_write_errors);
         free(reporter->zero_address_access_errors);
+        if (reporter->report_file != NULL) {
+                fclose(reporter->report_file);
+                reporter->report_file = NULL;
+        }
 
         wasm_state_exit(reporter->state);
 }

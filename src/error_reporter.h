@@ -3,8 +3,10 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "wasm_state.h"
+#include "report_options.h"
 
 struct undefined_memory_use {
         size_t address;
@@ -50,9 +52,17 @@ struct zero_address_access {
         size_t size;
 };
 
+struct check_status {
+        const char * type;
+        bool has_failed;
+};
+
 struct error_reporter {
         struct wasm_state *state;
-        bool report;
+        enum report_level report_level;
+        bool found_error;
+        bool report_to_file;
+        FILE * report_file;
 
         size_t undefined_memory_use_errors_size;
         struct undefined_memory_use *undefined_memory_use_errors;
@@ -100,7 +110,7 @@ void add_invalid_free(struct error_reporter *reporter, size_t address);
 void add_invalid_read(struct error_reporter *reporter, size_t address);
 void add_invalid_write(struct error_reporter *reporter, size_t address);
 void add_zero_address_access(struct error_reporter *reporter);
-void reporter_init(struct error_reporter *reporter, struct wasm_state *state, bool report);
+void reporter_init(struct error_reporter *reporter, struct wasm_state *state);
 void reporter_exit(struct error_reporter *reporter);
 
 #endif /* ERROR_REPORTER */

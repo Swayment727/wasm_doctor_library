@@ -37,5 +37,6 @@ void doctor_frame_exit(void);
 void doctor_init(struct wasm_doctor *wasm_doctor, uint32_t size_in_pages, bool report);
 void doctor_reporter_exit(void);
 void doctor_exit(bool exit_reporter);
+void doctor_set_report_level();
 
 #endif /* WASM_DOCTOR */
