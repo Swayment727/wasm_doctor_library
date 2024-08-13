@@ -6,7 +6,7 @@ set_report_level(enum report_level level){
 }
 
 enum report_level
-get_report_level(){
+get_report_level(void){
     return current_report_level;
 }
 
@@ -16,6 +16,6 @@ set_report_to_file(bool report){
 }
 
 bool
-get_report_to_file(){
+get_report_to_file(void){
     return report_to_file;
 }
